@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from auth import auth_router
 
 app = FastAPI()
 
+app.include_router(auth_router)
 
 class Item(BaseModel):
     text: str
@@ -10,7 +12,6 @@ class Item(BaseModel):
 
 
 items = []
-
 
 @app.get("/")
 def root():
