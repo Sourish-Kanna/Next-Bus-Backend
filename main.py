@@ -18,13 +18,13 @@ def root():
 
 
 @app.post("/items")
-def create_item(item: Item):
+def create_item(item: Item) -> list[Item]:
     items.append(item)
     return items
 
 
 @app.get("/items", response_model=list[Item])
-def list_items(limit: int = 10):
+def list_items(limit: int = 10) -> list[Item]:
     return items[0:limit]
 
 
