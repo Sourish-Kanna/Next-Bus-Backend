@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from auth import auth_router
+from firebase import db
 
 app = FastAPI()
 
