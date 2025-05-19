@@ -11,3 +11,7 @@ ver_1.include_router(test_router)
 ver_1.include_router(firebase_router)
 
 app.include_router(ver_1)
+
+@app.get('/')
+def root():
+    return {"message": "Welcome to the API!"}
