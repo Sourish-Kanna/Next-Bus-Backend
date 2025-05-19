@@ -9,6 +9,9 @@ ver_1 = APIRouter(prefix="/v1")
 ver_1.include_router(auth_router)
 ver_1.include_router(test_router)
 ver_1.include_router(firebase_router)
+@ver_1.get('/')
+def hello():
+    return {"message": "Welcome to the API!"}
 
 app.include_router(ver_1)
 
