@@ -8,10 +8,10 @@ class Item(BaseModel):
     is_done: bool = False
 
 
-items = []
+items: list[Item] = []
 
 @test_router.get("/")
-def root():
+def root() -> dict[str, str]:
     return {"message": "Hello World"}
 
 
