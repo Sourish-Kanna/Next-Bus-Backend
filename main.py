@@ -1,5 +1,5 @@
 from fastapi import FastAPI, APIRouter
-from v1 import auth,test,firebase
+import v1
 
 app = FastAPI()
 # Including the root endpoint
@@ -10,9 +10,9 @@ def root():
 '''Version 1'''
 # Importing routers from v1 module
 ver_1 = APIRouter(prefix="/v1")
-ver_1.include_router(auth.auth_router)
-ver_1.include_router(test.test_router)
-ver_1.include_router(firebase.firebase_router)
+ver_1.include_router(v1.auth_router)
+ver_1.include_router(v1.test_router)
+ver_1.include_router(v1.firebase_router)
 
 # Including the root endpoint for version 1
 @ver_1.get('/')
