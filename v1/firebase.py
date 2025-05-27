@@ -19,15 +19,17 @@ def verify_token(id_token):
         decoded_token = auth.verify_id_token(id_token)
         return decoded_token
     except Exception as e:
+        print(f"Token verification failed: {e}")
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
 firebase_router = APIRouter(prefix="/firebase", tags=["Firebase"])
 
-@firebase_router.get("/test")
+@firebase_router.post("/test")
 @log_activity
-async def test_firebase() -> dict[str, dict | str]:
+async def test_firebase(id_token: str) -> dict[str, dict | str]:
     """Test Firebase connection and list collections and documents."""
+    verify_token(id_token)
     collections = [col.id for col in db.collections()]
     collections_with_docs = {}
     for col in db.collections():
@@ -41,3 +43,10 @@ async def test_firebase() -> dict[str, dict | str]:
             "collections_with_docs": collections_with_docs
         }
     }
+
+@firebase_router.post("/verify_token")
+@log_activity
+def verify_firebase_token(id_token: str) -> dict[str, str | dict]:
+    """Verify Firebase ID token."""
+    decoded_token = verify_token(id_token)
+    return {"message": "Token is valid", "data": decoded_token}
