@@ -2,8 +2,7 @@ import os
 import json
 from fastapi import APIRouter, HTTPException
 from firebase_admin import credentials, initialize_app, firestore, auth
-
-from .cust_logging import log_activity
+from v1.cust_logging import log_activity
 
 # Initialize Firestore and Get the Firebase credentials from the environment variable
 firebase_credentials_json = os.getenv('FIREBASE_CREDENTIALS_JSON')
@@ -20,7 +19,7 @@ def verify_token(id_token):
         return decoded_token
     except Exception as e:
         print(f"Token verification failed: {e}")
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise HTTPException(status_code=401, detail="Invalid token or user not found")
 
 
 firebase_router = APIRouter(prefix="/firebase", tags=["Firebase"])
