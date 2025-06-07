@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Body
-from v1.decorators import log_activity, verify_id_token
-from v1.response_base import FireBaseResponse, TokenRequest
-import v1.firebase as firebase
+from v1.common_decorators import log_activity, verify_id_token
+from v1.common_response_base import FireBaseResponse, TokenRequest
+import v1.base_firebase as firebase
 
-test_router = APIRouter(prefix="/test", tags=["Firebase"])
+test_router = APIRouter(prefix="/test", tags=["Test"])
 
 @test_router.post("/test", response_model=FireBaseResponse)
 @verify_id_token

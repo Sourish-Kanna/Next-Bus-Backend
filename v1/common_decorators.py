@@ -1,8 +1,8 @@
 from functools import wraps
 import asyncio
 from fastapi import HTTPException, status
-from v1.response_base import TokenRequest
-import v1.firebase as firebase
+from v1.common_response_base import TokenRequest
+import v1.base_firebase as firebase
 
 def log_activity(func):
     @wraps(func)
