@@ -11,12 +11,18 @@ All endpoints under this module are accessible with the `/v1` prefix.
 __version__ = "1.0.0"
 
 from fastapi import APIRouter
-from .auth import auth_router
 from .test import test_router
 from .routes import routes_router
+import os  # Import os to read environment variables
 
 # Importing routers from v1 module
 ver_1 = APIRouter(prefix="/v1")
-# ver_1.include_router(auth_router)
-# ver_1.include_router(test_router)
+
 ver_1.include_router(routes_router)
+
+
+
+# Conditionally include the test_router based on the environment variable
+if os.getenv("ENABLE_TEST_ROUTE", "false").lower() == "true":
+    ver_1.include_router(test_router)
+
