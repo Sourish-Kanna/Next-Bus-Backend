@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from v1.cust_logging import log_activity
+from v1.decorators import log_activity
 
 auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
 
