@@ -1,8 +1,9 @@
 import os
 import json
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Body
 from firebase_admin import credentials, initialize_app, firestore, auth
 from v1.cust_logging import log_activity
+from v1.return_type import FireBaseResponse, TokenRequest
 
 # Initialize Firestore and Get the Firebase credentials from the environment variable
 firebase_credentials_json = os.getenv('FIREBASE_CREDENTIALS_JSON')
@@ -24,9 +25,9 @@ def verify_token(id_token):
 
 firebase_router = APIRouter(prefix="/firebase", tags=["Firebase"])
 
-@firebase_router.post("/test")
+@firebase_router.post("/test", response_model=FireBaseResponse)
 @log_activity
-async def test_firebase(id_token: str) -> dict[str, dict | str]:
+async def test_firebase(id_token: str) -> FireBaseResponse:
     """Test Firebase connection and list collections and documents."""
     verify_token(id_token)
     collections = [col.id for col in db.collections()]
@@ -35,17 +36,22 @@ async def test_firebase(id_token: str) -> dict[str, dict | str]:
         doc_ids = [doc.id for doc in col.stream()]
         collections_with_docs[col.id] = doc_ids
 
-    return {
-        "message": "Test successful",
-        "data": {
+    return FireBaseResponse(
+        message="Test successful",
+        data={
             "collections": collections,
             "collections_with_docs": collections_with_docs
         }
-    }
+    )
 
-@firebase_router.post("/verify_token")
+
+@firebase_router.post("/verify_token", response_model=FireBaseResponse)
 @log_activity
-def verify_firebase_token(id_token: str) -> dict[str, str | dict]:
+def verify_firebase_token(id_token: str) -> FireBaseResponse:
     """Verify Firebase ID token."""
     decoded_token = verify_token(id_token)
-    return {"message": "Token is valid", "data": decoded_token}
+    return FireBaseResponse(
+        message="Token is valid",
+        data=decoded_token,
+        status_code=200
+    )

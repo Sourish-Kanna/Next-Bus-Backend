@@ -1,11 +1,7 @@
 from fastapi import HTTPException, APIRouter
-from pydantic import BaseModel
+from v1.return_type import Item
 
 test_router = APIRouter(prefix="/test", tags=["Testing"])
-
-class Item(BaseModel):
-    text: str
-    is_done: bool = False
 
 
 items: list[Item] = []
@@ -15,7 +11,7 @@ def root() -> dict[str, str]:
     return {"message": "Hello World"}
 
 
-@test_router.post("/items")
+@test_router.post("/items", response_model=list[Item])
 def create_item(item: Item) -> list[Item]:
     items.append(item)
     return items
