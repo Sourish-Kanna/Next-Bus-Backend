@@ -1,11 +1,6 @@
 from pydantic import BaseModel
 
 
-class Item(BaseModel):
-    text: str
-    is_done: bool = False
-    status_code: int = 200
-
 class ResponseModel(BaseModel):
     status_code: int = 200
     success: bool = True
@@ -13,11 +8,17 @@ class ResponseModel(BaseModel):
     message: str
 
 class FireBaseResponse(ResponseModel):
-    data: dict
+    data: dict | None = None
+
+class RequestBody(BaseModel):
+    token: str
+    route_name: str
+    stops: list[str]
+    start: str
+    end: str
+    timing: list[dict]
+    last_updated: str
+    last_updated_by: str
 
 class TokenRequest(BaseModel):
-    id_token: str
-
-class FirestoreDocument(BaseModel):
-    id: str
-    data: dict
+    token: str | None

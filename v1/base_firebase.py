@@ -19,4 +19,4 @@ def verify_token(id_token):
         decoded_token = auth.verify_id_token(id_token)
         return decoded_token
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Token verification failed: {e}")
+        raise Exception(e)

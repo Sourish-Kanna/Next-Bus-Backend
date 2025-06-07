@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body
 from v1.common_decorators import log_activity, verify_id_token
-from v1.common_response_base import FireBaseResponse, TokenRequest
+from v1.common_response_base import FireBaseResponse , TokenRequest
 import v1.base_firebase as firebase
 
 test_router = APIRouter(prefix="/test", tags=["Test"])
@@ -8,7 +8,7 @@ test_router = APIRouter(prefix="/test", tags=["Test"])
 @test_router.post("/test", response_model=FireBaseResponse)
 @verify_id_token
 @log_activity
-async def test_firebase(token_request: TokenRequest = Body(...)) -> FireBaseResponse:
+async def test_firebase(input: TokenRequest = Body(...)) -> FireBaseResponse:
     """Test Firebase connection and list collections and documents."""
     collections = [col.id for col in firebase.db.collections()]
     collections_with_docs = {}
@@ -28,10 +28,12 @@ async def test_firebase(token_request: TokenRequest = Body(...)) -> FireBaseResp
 @test_router.post("/verify_token", response_model=FireBaseResponse)
 @verify_id_token
 @log_activity
-def verify_firebase_token(token_request: TokenRequest = Body(...)) -> FireBaseResponse:
+def verify_firebase_token(input: TokenRequest = Body(...)) -> FireBaseResponse:
     """Verify Firebase ID token."""
+    decoded_token = firebase.auth.verify_id_token(input.token)
     return FireBaseResponse(
         message="Token is valid",
-        data={"id_token": token_request.id_token},
-        status_code=200
+        data={
+            "token_details": decoded_token
+        },
     )

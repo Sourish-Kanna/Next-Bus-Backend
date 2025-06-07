@@ -12,13 +12,13 @@ __version__ = "1.0.0"
 
 from fastapi import APIRouter
 from .test import test_router
-from .timmings import routes_router
+from .timmings import routes_timming_router
 import os  # Import os to read environment variables
 
 # Importing routers from v1 module
 ver_1 = APIRouter(prefix="/v1")
 
-ver_1.include_router(routes_router)
+ver_1.include_router(routes_timming_router)
 
 
 
