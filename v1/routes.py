@@ -10,7 +10,7 @@ routes_router = APIRouter(prefix="/routes", tags=["Firebase"])
 @routes_router.post("/test", response_model=FireBaseResponse)
 @log_activity
 @verify_id_token
-async def test_firebase() -> FireBaseResponse:
+async def test_firebase(token_request: TokenRequest = Body(...)) -> FireBaseResponse:
     """Test Firebase connection and list collections and documents."""
     collections = [col.id for col in firebase.db.collections()]
     collections_with_docs = {}
