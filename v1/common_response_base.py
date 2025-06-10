@@ -10,7 +10,7 @@ class ResponseModel(BaseModel):
 class FireBaseResponse(ResponseModel):
     data: dict | None = None
 
-class RequestBody(BaseModel):
+class Add_Time(BaseModel):
     token: str
     route_name: str
     stops: list[str]

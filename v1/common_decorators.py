@@ -1,7 +1,6 @@
 from functools import wraps
 import asyncio
 from fastapi import HTTPException, status
-from v1.common_response_base import TokenRequest, RequestBody
 import v1.base_firebase as firebase
 
 def log_activity(func):
@@ -61,4 +60,3 @@ def verify_id_token(func):
         return async_wrapper
     else:
         return sync_wrapper
-    return wrapper
