@@ -20,3 +20,12 @@ def verify_token(id_token):
         return decoded_token
     except Exception as e:
         raise Exception(e)
+
+
+def create_custom_token(uid):
+    try:
+        custom_token = auth.create_custom_token(uid)
+        return custom_token.decode('utf-8')
+    except Exception as e:
+        raise Exception(e)
+
