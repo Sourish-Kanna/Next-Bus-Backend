@@ -1,83 +1,70 @@
-from fastapi import APIRouter, Body
-from v1.common_decorators import log_activity
-from v1.common_response_base import FireBaseResponse , TokenRequest, RequestBody
+from fastapi import APIRouter, Body, HTTPException, status
+import v1.common_response_base as response_base
 import v1.base_firebase as firebase
-from google.cloud.firestore_v1 import ArrayUnion, SERVER_TIMESTAMP
+import v1.timmings as timmings
 
 test_router = APIRouter(prefix="/test", tags=["Test"])
 
-# @test_router.post("/test1", response_model=FireBaseResponse)
-# # @verify_id_token
-# @log_activity
-# async def test_firebase(input: TokenRequest = Body(...)) -> FireBaseResponse:
-#     """Test Firebase connection and list collections and documents."""
-#     collections = [col.id for col in firebase.db.collections()]
-#     collections_with_docs = {}
-#     for col in firebase.db.collections():
-#         doc_ids = [doc.id for doc in col.stream()]
-#         collections_with_docs[col.id] = doc_ids
-
-#     return FireBaseResponse(
-#         message="Test successful",
-#         data={
-#             "collections": collections,
-#             "collections_with_docs": collections_with_docs
-#         }
-#     )
-
-
-@test_router.post("/verify_token", response_model=FireBaseResponse)
-# @verify_id_token
-@log_activity
-def verify_firebase_token(input: TokenRequest = Body(...)) -> FireBaseResponse:
-    """Verify Firebase ID token."""
-    decoded_token = firebase.auth.verify_id_token(input.token)
-    return FireBaseResponse(
-        message="Token is valid",
-        data={
-            "token_details": decoded_token
-        },
-    )
-
-
-@test_router.post("/test", response_model=FireBaseResponse)
-def add_route_time(input: RequestBody = Body(...)) -> FireBaseResponse:
-    """
-    Append a new timing entry to the timing array of the specified route.
-    If the route does not exist, create a new document in busRoutes/{route_name} with the specified fields.
-    """
+@test_router.post("/add")
+def add_new_route(input: response_base.Add_New_Route = Body(...)) -> response_base.FireBaseResponse:
     doc_ref = firebase.db.collection("busRoutes").document(input.route_name)
-    decoded_token = firebase.auth.verify_id_token(input.token)
     try:
         doc = doc_ref.get()
         if doc.exists:
-            # Update: append to timing array and update lastUpdated fields
-            doc_ref.update({
-                "timing": ArrayUnion([input.timing]),
-                "lastUpdated": SERVER_TIMESTAMP,
-                "lastUpdatedBy": decoded_token.get("uid")
-            })
-            return FireBaseResponse(
-                message="Timing entry added successfully",
-                data={"timing": input.timing}
-            )
-        else:
-            document_data = {
-                "lastUpdated": SERVER_TIMESTAMP,
-                "routeName": input.route_name,
-                "stops": input.stops,
-                "start": input.start,
-                "end": input.end,
-                "timing": [input.timing],
-                "lastUpdatedBy": decoded_token.get("uid"),
-            }
-            doc_ref.set(document_data)
-            return FireBaseResponse(
-                message="Document created successfully with initial timing",
-                data=document_data
-            )
+            raise Exception(f"{status.HTTP_409_CONFLICT} Document Exists, Update it")
+
+        return timmings.firebase_add_new_route(input)
+    
     except Exception as e:
-        return FireBaseResponse(
-            message="Failed to create or update document",
-            error=str(e)
+        status_code, error = str(e).split(maxsplit=1)
+        raise HTTPException(
+            status_code=int(status_code),
+            detail={
+                "message": "Error adding timing entry",
+                "error": error
+            }
+        )
+
+@test_router.post("/update")
+def update_time(input: response_base.Update_Time = Body(...)) -> response_base.FireBaseResponse:
+    doc_ref = firebase.db.collection("busRoutes").document(input.route_name)
+    try:
+        doc = doc_ref.get()
+        if not doc.exists:
+            raise Exception(f"{status.HTTP_404_NOT_FOUND} Document Does not exist, Create it first")
+
+        doc = doc.to_dict()
+        timing = doc.get("timing", [])
+        input_time: str = input.timing
+        for time in timing:
+            if 0 <= timmings.seconds_difference(time.get("time"), input_time) <= 300: # 300 sec is 5 Minutes
+                new = response_base.Firebase_Update_Time(
+                    token=input.token, 
+                    route_name=input.route_name, 
+                    timing=input.timing, 
+                    list_time= time.get("time")
+                    )
+                return timmings.firebase_update_time(new)
+            
+        time = timing[0]
+        time["time"] = input_time
+        time["delay_by"] = 0
+        time["deviation_sum"] = 0
+        time["deviation_count"] = 1
+        time["stop_name"] = input.stop
+        new_input = response_base.Firebase_Add_New_Time(
+            token=input.token, 
+            route_name=doc.get("RouteName"),
+            timing= time,
+            )
+        return timmings.firebase_add_new_time(new_input)
+        
+    except Exception as e:
+        status_code, error = str(e).split(maxsplit=1)
+        raise HTTPException(
+            status_code=int(status_code),
+            detail={
+                "message": "Error updating timing entry",
+                "error": error
+            }
         )
