@@ -15,7 +15,7 @@ from .test import test_router
 from .testing_done import test_done
 from .time import timming_router
 from .route import routes_router
-import os  # Import os to read environment variables
+import os
 
 # Importing routers from v1 module
 ver_1 = APIRouter(prefix="/v1")
