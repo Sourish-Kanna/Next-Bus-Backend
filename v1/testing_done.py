@@ -1,14 +1,14 @@
-import v1.test as test
 import v1.common_response_base as response_base
 from fastapi import Body, HTTPException, status, APIRouter
+from v1.common_decorators import log_activity, verify_id_token
 import v1.common_response_base as response_base
 import v1.base_firebase as firebase
 
 test_done = APIRouter(prefix="/test-done", tags=["Test"])
 
 @test_done.post("/verify_token", response_model=response_base.FireBaseResponse)
-# @verify_id_token
-# @log_activity
+@verify_id_token
+@log_activity
 def verify_firebase_token(input: response_base.TokenRequest = Body(...)) -> response_base.FireBaseResponse:
     """Verify Firebase ID token."""
     try:

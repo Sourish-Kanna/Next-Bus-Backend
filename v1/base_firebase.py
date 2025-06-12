@@ -29,3 +29,7 @@ def create_custom_token(uid):
     except Exception as e:
         raise Exception(e)
 
+def Name_and_UID(token):
+    decoded_token = verify_token(token)
+    return decoded_token.get("name"), decoded_token.get("uid")
+
