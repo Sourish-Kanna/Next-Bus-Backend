@@ -16,7 +16,6 @@ def get_route_details(route_name: str,token: str = Depends(common.get_token_from
     Get all details for a given route.
     """
     try:
-        firebase.verify_token(token)
         logger.info(f"Fetching details for route: {route_name}")
         doc_ref = firebase.db.collection("busRoutes").document(route_name)
         doc = doc_ref.get()
@@ -29,7 +28,7 @@ def get_route_details(route_name: str,token: str = Depends(common.get_token_from
         logger.info(f"Route details fetched successfully for {route_name}")
         return response_base.FireBaseResponse(
             message="Route details fetched successfully",
-            data=doc.to_dict()
+            data=doc.to_dict() # type: ignore
         )
     except Exception as e:
         logger.error(f"Failed to fetch route details for {route_name}: {e}")

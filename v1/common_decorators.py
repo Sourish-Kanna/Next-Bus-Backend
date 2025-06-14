@@ -9,14 +9,16 @@ logger = logging.getLogger(__name__)
 def log_activity(func):
     @wraps(func)
     def sync_wrapper(*args, **kwargs):
-        logger.info(f"Called {func.__name__} with args={args} kwargs={kwargs}")
+        filtered_kwargs = {k: v for k, v in kwargs.items() if k != "token"}
+        logger.info(f"Called {func.__name__} with args={args} kwargs={filtered_kwargs}")        
         result = func(*args, **kwargs)
         logger.info(f"{func.__name__} returned {result}")
         return result
 
     @wraps(func)
     async def async_wrapper(*args, **kwargs):
-        logger.info(f"Called {func.__name__} with args={args} kwargs={kwargs}")
+        filtered_kwargs = {k: v for k, v in kwargs.items() if k != "token"}
+        logger.info(f"Called {func.__name__} with args={args} kwargs={filtered_kwargs}")
         result = await func(*args, **kwargs)
         logger.info(f"{func.__name__} returned {result}")
         return result
