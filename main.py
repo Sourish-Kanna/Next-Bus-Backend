@@ -12,6 +12,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+logger.info("Firebase initializing at startup.")
 v1.base_firebase.initialize_firebase()
 logger.info("Firebase initialized at startup.")
 
