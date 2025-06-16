@@ -21,6 +21,7 @@ app = FastAPI()
 
 # Configure CORS
 if os.getenv("ENABLE_TEST_ROUTE", "false").lower() == "true":
+    logger.info("Local env....")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -29,6 +30,7 @@ if os.getenv("ENABLE_TEST_ROUTE", "false").lower() == "true":
         allow_headers=["*"],
     )
 else:
+    logger.info("Production env....")
     origin_list = [
     "https://next-bus-app.netlify.app",
     "https://next-bus-dev.netlify.app/"
