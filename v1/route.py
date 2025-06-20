@@ -36,7 +36,7 @@ def firebase_add_new_route(input: response_base.Add_New_Route, token: str) -> re
         logger.info(f"Route '{input.route_name}' created successfully.")
         return response_base.FireBaseResponse(
             message="Document created successfully with initial timing",
-            data=response_data # type: ignore
+            data=response_data
         )
     except Exception as e:
         logger.error(f"Failed to create route '{input.route_name}': {e}")
