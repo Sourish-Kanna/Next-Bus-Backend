@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-import v1.common_response_base as response_base
-from v1.common_decorators import verify_id_token, log_activity
-import v1.base_firebase as firebase
+import v1.common.response_base as response_base
+from v1.common.decorators import verify_id_token, log_activity
+import v1.common.firebase as firebase
 import v1.common as common
 import logging
 

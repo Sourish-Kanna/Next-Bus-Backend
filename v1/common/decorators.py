@@ -1,7 +1,7 @@
 from functools import wraps
 import asyncio
 from fastapi import HTTPException, status
-import v1.base_firebase as firebase
+import v1.common.firebase as firebase
 import logging
 
 logger = logging.getLogger(__name__)

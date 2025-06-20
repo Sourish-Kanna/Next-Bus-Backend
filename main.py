@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import v1
 import logging
-import v1.base_firebase 
+import v1.common.firebase as firebase
 import os
 
 # Configure logging
@@ -13,7 +13,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 logger.info("Firebase initializing at startup.")
-v1.base_firebase.initialize_firebase()
+firebase.initialize_firebase()
 logger.info("Firebase initialized at startup.")
 
 app = FastAPI()

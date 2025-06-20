@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Body, HTTPException , status, Depends
-from v1.common_decorators import log_activity, verify_id_token
+from v1.common.decorators import log_activity, verify_id_token
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
-import v1.common_response_base as response_base
-import v1.base_firebase as firebase
+import v1.common.response_base as response_base
+import v1.common.firebase as firebase
 import v1.common as common
 import logging
 
