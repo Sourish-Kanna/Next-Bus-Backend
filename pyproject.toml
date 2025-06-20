@@ -1,0 +1,12 @@
+[project]
+name = "next-bus-backend"
+version = "0.1.0"
+description = "Next Bus Backend is a RESTful API service built with FastAPI to provide real-time bus arrival information."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.115.13",
+    "firebase-admin>=6.9.0",
+    "python-dotenv>=1.1.0",
+    "uvicorn>=0.34.3",
+]
