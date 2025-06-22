@@ -36,7 +36,7 @@ def firebase_add_new_route(input: response_base.Add_New_Route, token: str) -> re
         logger.info(f"Route '{input.route_name}' created successfully.")
         return response_base.FireBaseResponse(
             message="Document created successfully with initial timing",
-            data=response_data
+            data=response_data # type: ignore
         )
     except Exception as e:
         logger.error(f"Failed to create route '{input.route_name}': {e}")
@@ -72,4 +72,27 @@ def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = D
                 "message": "Error adding timing entry",
                 "error": error
             }
+        )
+    
+@routes_router.get("/routes", response_model=response_base.FireBaseResponse)
+@log_activity
+def get_routes(token: str = Depends(common.get_token_from_header)) -> response_base.FireBaseResponse:
+    """
+    Get all bus routes.
+    """
+    try:
+        logger.info("Fetching all bus routes")
+        routes_ref = firebase.db.collection("busRoutes")
+        routes = routes_ref.stream()
+        all_routes = [route.id for route in routes]
+        logger.info(f"All routes fetched successfully: {all_routes}")
+        return response_base.FireBaseResponse(
+            message="All routes fetched successfully",
+            data=all_routes
+        )
+    except Exception as e:
+        logger.error(f"Failed to fetch routes: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch routes: {e}"
         )

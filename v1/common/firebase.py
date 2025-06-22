@@ -35,6 +35,15 @@ def verify_token(id_token):
         logger.error(f"Token verification failed: {e}")
         raise Exception(e)
 
+def get_token_details(id_token):
+    try:
+        decoded_token = auth.verify_id_token(id_token)
+        logger.info("Token Data extracted successfully")
+        return decoded_token
+    except Exception as e:
+        logger.error(f"Token verification failed: {e}")
+        raise Exception(e)
+
 def create_custom_token(uid):
     try:
         custom_token = auth.create_custom_token(uid)
@@ -45,7 +54,44 @@ def create_custom_token(uid):
         raise Exception(e)
 
 def Name_and_UID(token):
-    decoded_token = verify_token(token)
+    decoded_token = get_token_details(token)
     logger.info(f"Extracted name and UID from token: {decoded_token.get('name')}, {decoded_token.get('uid')}")
     return decoded_token.get("name"), decoded_token.get("uid")
 
+def get_admin_details(token):
+    try:
+        decoded_token = get_token_details(token)
+        user_id = decoded_token.get("uid")
+        is_admin = False
+        if not user_id:
+            logger.error("UID not found in token")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="UID not found in token"
+            )
+
+        logger.info(f"Fetching admin details for user ID: {user_id}")
+        user_ref = db.collection("users").document(user_id) # type: ignore
+        user_doc = user_ref.get()
+        if not user_doc.exists:
+            logger.error(f"User document not found for UID: {user_id}")
+            is_admin = False
+            
+        user_data = user_doc.to_dict()
+        is_admin = user_data.get("isAdmin", False) # type: ignore
+        logger.info(f"User {user_id} isAdmin status: {is_admin}")
+
+        user_details = {
+            "sign_in_provider": decoded_token.get("firebase", {}).get("sign_in_provider", "Unknown"),
+            "isAdmin": is_admin
+        }
+        logger.info(f"Admin user details fetched successfully: {user_details}")
+        return user_details
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to fetch admin user details: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Token verification failed: {e}"
+        )
