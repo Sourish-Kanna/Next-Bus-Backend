@@ -38,9 +38,9 @@ def firebase_update_time(input: response_base.Firebase_Update_Time, token: str )
         doc_ref.update(document)
         logger.info(f"Timing entry updated for route '{input.route_name}'.")
         return response_base.FireBaseResponse(
-        message="Timing entry updated successfully",
-                data={"timing": input.timing}
-            )
+            message="Timing entry updated successfully",
+            data={"timing": input.timing}
+        )
              
     except Exception as e:
         logger.error(f"Failed to update timing for route '{input.route_name}': {e}")
