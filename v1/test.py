@@ -56,7 +56,7 @@ def verify_firebase_token(token: str = Depends(common.get_token_from_header)) ->
 
 @test_router.get("/{route_name}")
 @log_activity
-def get_route_details(route_name: str,token: str = Depends(common.get_token_from_header)) -> response_base.FireBaseResponse:
+def get_route_details(route_name: str) -> response_base.FireBaseResponse:
     """
     Get all details for a given route.
     """

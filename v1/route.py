@@ -76,7 +76,7 @@ def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = D
     
 @routes_router.get("/routes", response_model=response_base.FireBaseResponse)
 @log_activity
-def get_routes(token: str = Depends(common.get_token_from_header)) -> response_base.FireBaseResponse:
+def get_routes() -> response_base.FireBaseResponse:
     """
     Get all bus routes.
     """

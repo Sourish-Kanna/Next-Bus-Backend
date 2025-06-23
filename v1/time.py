@@ -141,7 +141,7 @@ def update_time(input: response_base.Update_Time = Body(...), token:str = Depend
     
 @timming_router.get("/{route_name}")
 @log_activity
-def get_time(route_name: str, token: str = Depends(common.get_token_from_header)) -> response_base.FireBaseResponse:
+def get_time(route_name: str) -> response_base.FireBaseResponse:
     """
     Get timing details for a specific route.
     """
