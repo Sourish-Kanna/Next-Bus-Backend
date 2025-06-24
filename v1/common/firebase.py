@@ -63,29 +63,30 @@ def get_admin_details(token):
         decoded_token = get_token_details(token)
         user_id = decoded_token.get("uid")
         is_admin = False
-        if not user_id:
-            logger.error("UID not found in token")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="UID not found in token"
-            )
+        is_logged_in = False
+        is_guest = False
 
-        logger.info(f"Fetching admin details for user ID: {user_id}")
-        user_ref = db.collection("users").document(user_id) # type: ignore
-        user_doc = user_ref.get()
-        if not user_doc.exists:
-            logger.error(f"User document not found for UID: {user_id}")
+        if user_id:
+            is_logged_in = True
+            user_ref = db.collection("users").document(user_id)  # type: ignore
+            user_doc = user_ref.get()
+            if user_doc.exists:
+                user_data = user_doc.to_dict()
+                is_admin = user_data.get("isAdmin", False)  # type: ignore
+            else:
+                is_admin = False
+        else:
+            is_logged_in = False
             is_admin = False
-            
-        user_data = user_doc.to_dict()
-        is_admin = user_data.get("isAdmin", False) # type: ignore
-        logger.info(f"User {user_id} isAdmin status: {is_admin}")
+            is_guest = True
 
         user_details = {
+            "isAdmin": is_admin,
+            "isLoggedIn": is_logged_in,
+            "isGuest": is_guest,
             "sign_in_provider": decoded_token.get("firebase", {}).get("sign_in_provider", "Unknown"),
-            "isAdmin": is_admin
         }
-        logger.info(f"Admin user details fetched successfully: {user_details}")
+        logger.info(f"User details fetched: {user_details}")
         return user_details
     except HTTPException:
         raise
