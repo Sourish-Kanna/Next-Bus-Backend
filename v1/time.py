@@ -24,10 +24,10 @@ def firebase_update_time(input: response_base.Firebase_Update_Time, token: str )
         time = doc.to_dict().get("timing", []) # type: ignore
         for t in time:
             if t.get("time") == input.list_time:
-                avg = (t.get("deviation_sum") + common.seconds_difference(input.list_time, input.timing)) / (t.get("deviation_count") + 1)
-                t["delay_by"] = avg
                 t["deviation_sum"] += common.seconds_difference(input.list_time, input.timing)
                 t["deviation_count"] += 1
+                avg = t.get("deviation_sum") / t.get("deviation_count")
+                t["delay_by"] = avg
                 break
 
         document = {
@@ -106,13 +106,29 @@ def update_time(input: response_base.Update_Time = Body(...), token:str = Depend
         timing = doc.get("timing", []) # type: ignore
         input_time: str = input.timing
         for time in timing:
-            if 0 <= common.seconds_difference(time.get("time"), input_time) <= 300: # 300 sec is 5 Minutes
+            prev_time = timing[timing.index(time) - 1].get("time") if timing.index(time) > 0 else None
+            diff_with_prev = common.seconds_difference(prev_time, input_time) if prev_time else None
+            diff_with_current = common.seconds_difference(input_time, time.get("time"))
+            if (diff_with_prev is None or diff_with_prev > 300) and 0 <= diff_with_current <= 300:
                 new = response_base.Firebase_Update_Time(
                     route_name=input.route_name, 
                     timing=input.timing, 
                     list_time= time.get("time")
                     )
                 logger.info(f"Updating existing timing for route '{input.route_name}'.")
+                return firebase_update_time(new, token)
+            elif (
+                diff_with_prev is not None
+                and diff_with_prev > 300
+                and 0 <= diff_with_current <= 300
+                and -300 <= common.seconds_difference(input_time, time.get("time")) < 0
+            ):
+                new = response_base.Firebase_Update_Time(
+                    route_name=input.route_name,
+                    timing=input.timing,
+                    list_time=time.get("time")
+                )
+                logger.info(f"Updating existing timing (with input_time before current time) for route '{input.route_name}'.")
                 return firebase_update_time(new, token)
             
         time = timing[0]
@@ -155,7 +171,7 @@ def get_time(route_name: str) -> response_base.FireBaseResponse:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Route not found"
             )
-        timing_data = [t.get("time") for t in doc.to_dict().get("timing", [])]  # type: ignore
+        timing_data = [{"time":t.get("time"), "stop": t.get("stop_name"), "delay": t.get("delay_by")} for t in doc.to_dict().get("timing", [])]  # type: ignore
         logger.info(f"Timing details fetched successfully for route '{route_name}': {timing_data}")
         return response_base.FireBaseResponse(
             message="Timing details fetched successfully",
