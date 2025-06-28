@@ -62,11 +62,15 @@ def get_admin_details(token):
     try:
         decoded_token = get_token_details(token)
         user_id = decoded_token.get("uid")
+        sign_in_provider = decoded_token.get("firebase", {}).get("sign_in_provider", None)
         is_admin = False
-        is_logged_in = False
+        is_logged_in = False # Non admin user but logged in
         is_guest = False
+        allowed_providers = ["password", "google.com"]
+        if getenv("ENABLE_TEST_ROUTE", "false").lower() == "true":
+            allowed_providers.append("custom")
 
-        if user_id:
+        if user_id and sign_in_provider in allowed_providers:
             is_logged_in = True
             user_ref = db.collection("users").document(user_id)  # type: ignore
             user_doc = user_ref.get()
@@ -75,16 +79,20 @@ def get_admin_details(token):
                 is_admin = user_data.get("isAdmin", False)  # type: ignore
             else:
                 is_admin = False
-        else:
+        elif sign_in_provider == "anonymous":
             is_logged_in = False
             is_admin = False
             is_guest = True
+        else:
+            is_logged_in = False
+            is_admin = False
+            is_guest = False
 
         user_details = {
             "isAdmin": is_admin,
             "isLoggedIn": is_logged_in,
             "isGuest": is_guest,
-            "sign_in_provider": decoded_token.get("firebase", {}).get("sign_in_provider", "Unknown"),
+            "sign_in_provider": sign_in_provider if sign_in_provider else "unknown",
         }
         logger.info(f"User details fetched: {user_details}")
         return user_details

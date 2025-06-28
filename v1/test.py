@@ -22,6 +22,8 @@ def get_user_details(token: str = Depends(common.get_token_from_header)):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User details not found"
             )
+        
+        logger.info("User details fetched successfully")
         return response_base.FireBaseResponse(
             message="User details fetched successfully",
             data=detail,
