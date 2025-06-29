@@ -78,3 +78,64 @@ def verify_id_token(func):
         return async_wrapper
     else:
         return sync_wrapper
+
+def  is_authenticated(func):
+    @wraps(func)
+    def sync_wrapper(*args, **kwargs):
+        token = extract_token_from_kwargs_or_header(args, kwargs)
+        detail = firebase.get_admin_details(token)
+        if not detail or not detail.get("isLoggedIn",False):
+            logger.error("Authentication failed: No user details found")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication failed: No user details found"
+            )
+        return func(*args, **kwargs)
+
+    @wraps(func)
+    async def async_wrapper(*args, **kwargs):
+        token = extract_token_from_kwargs_or_header(args, kwargs)
+        detail = firebase.get_admin_details(token)
+        if not detail or not detail.get("isLoggedIn",False):
+            logger.error("Authentication failed: No user details found")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication failed: No user details found"
+            )
+        return await func(*args, **kwargs)
+
+    if asyncio.iscoroutinefunction(func):
+        return async_wrapper
+    else:
+        return sync_wrapper
+    
+def is_admin(func):
+    @wraps(func)
+    def sync_wrapper(*args, **kwargs):
+        token = extract_token_from_kwargs_or_header(args, kwargs)
+        detail = firebase.get_admin_details(token)
+        if not detail.get("isAdmin", False):
+            logger.error("Authorization failed: User is not an admin")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Authorization failed: User is not an admin"
+            )
+        return func(*args, **kwargs)
+
+    @wraps(func)
+    async def async_wrapper(*args, **kwargs):
+        token = extract_token_from_kwargs_or_header(args, kwargs)
+        detail = firebase.get_admin_details(token)
+        if not detail.get("isAdmin", False):
+            logger.error("Authorization failed: User is not an admin")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Authorization failed: User is not an admin"
+            )
+        return await func(*args, **kwargs)
+
+    if asyncio.iscoroutinefunction(func):
+        return async_wrapper
+    else:
+        return sync_wrapper
+    

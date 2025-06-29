@@ -96,8 +96,6 @@ def get_admin_details(token):
         }
         logger.info(f"User details fetched: {user_details}")
         return user_details
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"Failed to fetch admin user details: {e}")
         raise HTTPException(

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Body, HTTPException , status, Depends
-from v1.common.decorators import log_activity, verify_id_token
+from v1.common.decorators import log_activity, verify_id_token, is_authenticated
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 import v1.common.response_base as response_base
 import v1.common.firebase as firebase
@@ -92,8 +92,9 @@ def firebase_add_new_time(input: response_base.Firebase_Add_New_Time, token: str
         )
 
 @timming_router.post("/update")
-@verify_id_token
 @log_activity
+@verify_id_token
+@is_authenticated
 def update_time(input: response_base.Update_Time = Body(...), token:str = Depends(common.get_token_from_header)) -> response_base.FireBaseResponse:
     doc_ref = firebase.db.collection("busRoutes").document(input.route_name)
     try:
