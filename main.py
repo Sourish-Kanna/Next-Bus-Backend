@@ -18,30 +18,26 @@ logger.info("Firebase initialized at startup.")
 
 app = FastAPI()
 
-
-# Configure CORS
-if os.getenv("ENABLE_TEST_ROUTE", "false").lower() == "true":
+if os.getenv("DEV_ENV", "false").lower() == "true":
     logger.info("Loading Dev env....")
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
 else:
     logger.info("Loading Production env....")
-    origin_list = [
-    "https://next-bus-app.netlify.app",
-    "https://next-bus-dev.netlify.app/"
-    ]
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origin_list,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+
+origin_list_str = os.getenv("ORIGIN_LIST")
+if origin_list_str == "*":
+    origin_list = ["*"]
+else:
+    origin_list = origin_list_str.split(",") if origin_list_str else []
+logger.info(f"Allowed origins: {origin_list}")
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origin_list,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Including the root endpoint
 @app.get('/')

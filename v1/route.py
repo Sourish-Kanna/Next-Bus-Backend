@@ -40,7 +40,8 @@ def firebase_add_new_route(input: response_base.Add_New_Route, token: str) -> re
         )
     except Exception as e:
         logger.error(f"Failed to create route '{input.route_name}': {e}")
-        status_code, error = str(e).split(maxsplit=1)
+        status_code = getattr(e, "status_code", 500)
+        error = str(e)
         raise HTTPException(
             status_code=int(status_code),
             detail={
@@ -66,7 +67,8 @@ def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = D
     
     except Exception as e:
         logger.error(f"Error adding timing entry for route '{input.route_name}': {e}")
-        status_code, error = str(e).split(maxsplit=1)
+        status_code = getattr(e, "status_code", 500)
+        error = str(e)
         raise HTTPException(
             status_code=int(status_code),
             detail={

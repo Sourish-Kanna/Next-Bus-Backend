@@ -7,7 +7,7 @@ import v1.common as common
 import logging
 
 logger = logging.getLogger(__name__)
-timming_router = APIRouter(prefix="/timings", tags=["Timings"])
+timing_router = APIRouter(prefix="/timings", tags=["Timings"])
 
 def firebase_update_time(input: response_base.Firebase_Update_Time, token: str ) -> response_base.FireBaseResponse:
     """
@@ -44,7 +44,8 @@ def firebase_update_time(input: response_base.Firebase_Update_Time, token: str )
              
     except Exception as e:
         logger.error(f"Failed to update timing for route '{input.route_name}': {e}")
-        status_code, error = str(e).split(maxsplit=1)
+        status_code = getattr(e, "status_code", 500)
+        error = str(e)
         raise HTTPException(
             status_code=int(status_code),
             detail={
@@ -82,7 +83,8 @@ def firebase_add_new_time(input: response_base.Firebase_Add_New_Time, token: str
         )
     except Exception as e:
         logger.error(f"Failed to add new timing for route '{input.route_name}': {e}")
-        status_code, error = str(e).split(maxsplit=1)
+        status_code = getattr(e, "status_code", 500)
+        error = str(e)
         raise HTTPException(
             status_code=int(status_code),
             detail={
@@ -91,7 +93,7 @@ def firebase_add_new_time(input: response_base.Firebase_Add_New_Time, token: str
             }
         )
 
-@timming_router.post("/update")
+@timing_router.post("/update")
 @log_activity
 @verify_id_token
 @is_authenticated
@@ -147,7 +149,8 @@ def update_time(input: response_base.Update_Time = Body(...), token:str = Depend
         
     except Exception as e:
         logger.error(f"Error updating timing entry for route '{input.route_name}': {e}")
-        status_code, error = str(e).split(maxsplit=1)
+        status_code = getattr(e, "status_code", 500)
+        error = str(e)
         raise HTTPException(
             status_code=int(status_code),
             detail={
@@ -156,7 +159,7 @@ def update_time(input: response_base.Update_Time = Body(...), token:str = Depend
             }
         )
     
-@timming_router.get("/{route_name}")
+@timing_router.get("/{route_name}")
 @log_activity
 def get_time(route_name: str) -> response_base.FireBaseResponse:
     """

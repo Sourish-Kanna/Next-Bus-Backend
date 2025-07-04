@@ -12,7 +12,7 @@ __version__ = "1.0.0"
 
 from fastapi import APIRouter
 from .test import test_router
-from .time import timming_router
+from .time import timing_router
 from .route import routes_router
 from .user import user_router
 import os
@@ -20,10 +20,10 @@ import os
 # Importing routers from v1 module
 ver_1 = APIRouter(prefix="/v1")
 
-ver_1.include_router(timming_router)
+ver_1.include_router(timing_router)
 ver_1.include_router(routes_router)
 ver_1.include_router(user_router)
 
 # Conditionally include the test_router based on the environment variable
-if os.getenv("ENABLE_TEST_ROUTE", "false").lower() == "true":
+if os.getenv("DEV_ENV", "false").lower() == "true":
     ver_1.include_router(test_router)

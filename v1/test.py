@@ -15,12 +15,12 @@ test_router = APIRouter(prefix="/test", tags=["Test"])
 def verify_firebase_token(token: str = Depends(common.get_token_from_header)) -> response_base.FireBaseResponse:
     """Verify Firebase ID token."""
     try:
-        decoded_token = firebase.auth.verify_id_token(token)
+        decoded_token = firebase.get_token_details(token)
         logger.info("Token verified successfully in /test-done/verify_token endpoint.")
         return response_base.FireBaseResponse(
             message="Token is valid",
             data={
-                "token_details": decoded_token
+                "user_id": decoded_token.get("user_id", ""),
             },
         )
     except Exception as e:

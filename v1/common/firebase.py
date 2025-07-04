@@ -28,9 +28,9 @@ def initialize_firebase():
 
 def verify_token(id_token):
     try:
-        decoded_token = auth.verify_id_token(id_token)
+        auth.verify_id_token(id_token)
         logger.info("Token verified successfully")
-        return decoded_token
+        return None
     except Exception as e:
         logger.error(f"Token verification failed: {e}")
         raise Exception(e)
@@ -41,7 +41,7 @@ def get_token_details(id_token):
         logger.info("Token Data extracted successfully")
         return decoded_token
     except Exception as e:
-        logger.error(f"Token verification failed: {e}")
+        logger.error(f"Token Data extraction failed: {e}")
         raise Exception(e)
 
 def create_custom_token(uid):
@@ -67,7 +67,7 @@ def get_admin_details(token):
         is_logged_in = False # Non admin user but logged in
         is_guest = False
         allowed_providers = ["password", "google.com"]
-        if getenv("ENABLE_TEST_ROUTE", "false").lower() == "true":
+        if getenv("DEV_ENV", "false").lower() == "true":
             allowed_providers.append("custom")
 
         if user_id and sign_in_provider in allowed_providers:
