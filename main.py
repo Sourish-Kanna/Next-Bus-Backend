@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import v1.common.firebase as firebase
 import v1
 import logging
-import v1.common.firebase as firebase
 import os
+import dotenv
+dotenv.load_dotenv()
 
 # Configure logging
 logging.basicConfig(
