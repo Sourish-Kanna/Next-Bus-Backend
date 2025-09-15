@@ -1,38 +1,51 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from auth import auth_router
-from firebase import db
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import v1.common.firebase as firebase
+import v1
+import logging
+import os
+import dotenv
+dotenv.load_dotenv()
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s:     %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+logger.info("Firebase initializing at startup.")
+firebase.initialize_firebase()
+logger.info("Firebase initialized at startup.")
 
 app = FastAPI()
 
-app.include_router(auth_router)
+if os.getenv("DEV_ENV", "false").lower() == "true":
+    logger.info("Loading Dev env....")
+else:
+    logger.info("Loading Production env....")
 
-class Item(BaseModel):
-    text: str
-    is_done: bool = False
+origin_list_str = os.getenv("ORIGIN_LIST")
+if origin_list_str == "*":
+    origin_list = ["*"]
+else:
+    origin_list = origin_list_str.split(",") if origin_list_str else []
+logger.info(f"Allowed origins: {origin_list}")
 
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origin_list,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-items = []
-
-@app.get("/")
+# Including the root endpoint
+@app.get('/')
 def root():
-    return {"message": "Hello World"}
+    logger.info("Root endpoint called")
+    return {"message": "Welcome to the API!"}
 
-
-@app.post("/items")
-def create_item(item: Item) -> list[Item]:
-    items.append(item)
-    return items
-
-
-@app.get("/items", response_model=list[Item])
-def list_items(limit: int = 10) -> list[Item]:
-    return items[0:limit]
-
-
-@app.get("/items/{item_id}", response_model=Item)
-def get_item(item_id: int) -> Item:
-    if item_id < len(items):
-        return items[item_id]
-    else:
-        raise HTTPException(status_code=404, detail=f"Item {item_id} not found")
+# Including the version 1 router in the main app
+app.include_router(v1.ver_1)
