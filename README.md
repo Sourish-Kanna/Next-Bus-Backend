@@ -36,12 +36,6 @@ Next Bus Backend is a RESTful API service built with FastAPI to provide real-tim
 Start the development server with:
 
 ```bash
-fastapi dev main.py --reload
-```
-
-Or, if that doesnt work try:
-
-```bash
 uvicorn main:app --reload
 ```
 
