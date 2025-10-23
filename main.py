@@ -44,8 +44,14 @@ app.add_middleware(
 # Including the root endpoint
 @app.get('/')
 def root():
-    logger.info("Root endpoint called")
+    logger.info("Root endpoint called GET")
     return {"message": "Welcome to the API!"}
+
+@app.head("/")
+def root_head():
+    logger.info("Root endpoint called HEAD")
+    return {"message": "ok"}
+
 
 # Including the version 1 router in the main app
 app.include_router(v1.ver_1)
