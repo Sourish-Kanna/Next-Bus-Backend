@@ -1,10 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 import v1.common.firebase as firebase
 import v1
 import logging
 import os
 import dotenv
+
 dotenv.load_dotenv()
 
 # Configure logging
@@ -42,12 +43,20 @@ app.add_middleware(
 )
 
 # Including the root endpoint
-@app.head("/")
-@app.get('/')
-def root():
-    logger.info("Root endpoint called GET")
-    return {"message": "Welcome to the API!"}
+@app.head("/",  response_model=None)
+@app.get("/",  response_model=None)
+def root(request: Request):
+    if request.method == "HEAD":
+        logger.info("Root endpoint called with HEAD request")
+        return Response(status_code=200)
+    else:
+        logger.info("Root endpoint called with GET request")
+        return {"message": "Welcome to the API!"}
 
+# Silent favicon handler (no 404, no docs entry)
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon() -> Response:
+    return Response(status_code=204)  # 204 = No Content
 
 # Including the version 1 router in the main app
 app.include_router(v1.ver_1)
