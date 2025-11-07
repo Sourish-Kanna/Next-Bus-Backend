@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 import v1.common.firebase as firebase
 import v1
 import logging
@@ -15,11 +16,22 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-logger.info("Firebase initializing at startup.")
-firebase.initialize_firebase()
-logger.info("Firebase initialized at startup.")
+# --- Firebase initialization moved into the lifespan event ---
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Code to run on startup
+    logger.info("Firebase initializing at startup.")
+    firebase.initialize_firebase()
+    logger.info("Firebase initialized at startup.")
+    
+    yield  # The application runs here
+    
+    # Code to run on shutdown (if any)
+    logger.info("Application is shutting down.")
+
+# --- Pass the lifespan function to your app ---
+app = FastAPI(lifespan=lifespan)
 
 if os.getenv("DEV_ENV", "false").lower() == "true":
     logger.info("Loading Dev env....")

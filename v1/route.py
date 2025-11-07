@@ -60,20 +60,23 @@ def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = D
         doc = doc_ref.get()
         if doc.exists:
             logger.warning(f"Route '{input.route_name}' already exists.")
-            raise Exception(f"{status.HTTP_409_CONFLICT} Document Exists, Update it")
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Document Exists, Update it"
+            )
 
         logger.info(f"Adding new route: {input.route_name}")
         return firebase_add_new_route(input,token)
     
+    except HTTPException as he:
+        raise he
     except Exception as e:
         logger.error(f"Error adding timing entry for route '{input.route_name}': {e}")
-        status_code = getattr(e, "status_code", 500)
-        error = str(e)
         raise HTTPException(
-            status_code=int(status_code),
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
                 "message": "Error adding timing entry",
-                "error": error
+                "error": str(e)
             }
         )
     

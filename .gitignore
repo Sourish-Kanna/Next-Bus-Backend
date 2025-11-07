@@ -1,7 +1,2 @@
 __pycache__/
 .env
-service.json
-requirements_new.txt
-.vscode/
-test.txt
-test.py

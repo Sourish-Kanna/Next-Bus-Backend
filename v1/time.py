@@ -98,67 +98,81 @@ def firebase_add_new_time(input: response_base.Firebase_Add_New_Time, token: str
 @verify_id_token
 @is_authenticated
 def update_time(input: response_base.Update_Time = Body(...), token:str = Depends(common.get_token_from_header)) -> response_base.FireBaseResponse:
-    doc_ref = firebase.db.collection("busRoutes").document(input.route_name)
     try:
+        doc_ref = firebase.db.collection("busRoutes").document(input.route_name)
         doc = doc_ref.get()
         if not doc.exists:
             logger.warning(f"Route '{input.route_name}' does not exist for update_time endpoint.")
-            raise Exception(f"{status.HTTP_404_NOT_FOUND} Document Does not exist, Create it first")
-
-        doc = doc.to_dict()
-        timing = doc.get("timing", []) # type: ignore
-        input_time: str = input.timing
-        for time in timing:
-            prev_time = timing[timing.index(time) - 1].get("time") if timing.index(time) > 0 else None
-            diff_with_prev = common.seconds_difference(prev_time, input_time) if prev_time else None
-            diff_with_current = common.seconds_difference(input_time, time.get("time"))
-            if (diff_with_prev is None or diff_with_prev > 300) and 0 <= diff_with_current <= 300:
-                new = response_base.Firebase_Update_Time(
-                    route_name=input.route_name, 
-                    timing=input.timing, 
-                    list_time= time.get("time")
-                    )
-                logger.info(f"Updating existing timing for route '{input.route_name}'.")
-                return firebase_update_time(new, token)
-            elif (
-                diff_with_prev is not None
-                and diff_with_prev > 300
-                and 0 <= diff_with_current <= 300
-                and -300 <= common.seconds_difference(input_time, time.get("time")) < 0
-            ):
-                new = response_base.Firebase_Update_Time(
-                    route_name=input.route_name,
-                    timing=input.timing,
-                    list_time=time.get("time")
-                )
-                logger.info(f"Updating existing timing (with input_time before current time) for route '{input.route_name}'.")
-                return firebase_update_time(new, token)
-            
-        time = timing[0]
-        time["time"] = input_time
-        time["delay_by"] = 0
-        time["deviation_sum"] = 0
-        time["deviation_count"] = 1
-        time["stop_name"] = input.stop
-        new_input = response_base.Firebase_Add_New_Time(
-            route_name=doc.get("RouteName"),  # type: ignore
-            timing= time,
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Document Does not exist, Create it first"
             )
+
+        doc_dict = doc.to_dict()
+        timing = doc_dict.get("timing", [])
+        input_time = input.timing
+        
+        # Convert 24-hour times to 12-hour format for comparison
+        def to_12hr(time_str):
+            try:
+                hour = int(time_str.split(":")[0])
+                minute = int(time_str.split(":")[1])
+                suffix = "AM" if hour < 12 else "PM"
+                if hour == 0:
+                    hour = 12
+                elif hour > 12:
+                    hour -= 12
+                return f"{hour}:{minute:02d} {suffix}"
+            except:
+                return time_str
+
+        input_12hr = to_12hr(input_time)
+        
+        # Check existing times and update if within threshold
+        for time in timing:
+            time_12hr = to_12hr(time.get("time"))
+            try:
+                diff = abs(common.seconds_difference(input_12hr, time_12hr))
+                if diff <= 300:  # Within 5 minutes
+                    new = response_base.Firebase_Update_Time(
+                        route_name=input.route_name, 
+                        timing=input_time, 
+                        list_time=time.get("time")
+                    )
+                    logger.info(f"Updating existing timing for route '{input.route_name}'.")
+                    return firebase_update_time(new, token)
+            except Exception as e:
+                logger.warning(f"Time comparison failed: {e}, continuing to next time")
+                continue
+
+        # If no matching time found, add new time
+        new_time = {
+            "time": input_time,
+            "delay_by": 0,
+            "deviation_sum": 0,
+            "deviation_count": 1,
+            "stop_name": input.stop
+        }
+        
+        new_input = response_base.Firebase_Add_New_Time(
+            route_name=input.route_name,
+            timing=new_time,
+        )
         logger.info(f"Adding new timing for route '{input.route_name}'.")
         return firebase_add_new_time(new_input, token)
         
+    except HTTPException as he:
+        raise he
     except Exception as e:
         logger.error(f"Error updating timing entry for route '{input.route_name}': {e}")
-        status_code = getattr(e, "status_code", 500)
-        error = str(e)
         raise HTTPException(
-            status_code=int(status_code),
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
             detail={
                 "message": "Error updating timing entry",
-                "error": error
+                "error": str(e)
             }
         )
-    
+
 @timing_router.get("/{route_name}")
 @log_activity
 def get_time(route_name: str) -> response_base.FireBaseResponse:
