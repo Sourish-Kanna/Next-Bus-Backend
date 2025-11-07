@@ -1,29 +1,5 @@
 from unittest.mock import patch, MagicMock
-from v1.common.response_base import Add_New_Route
-
-@patch('v1.common.firebase.db')
-@patch('v1.common.firebase.Name_and_UID')
-def test_firebase_add_new_route_success(mock_name_and_uid, mock_db):
-    """Tests the internal route creation logic successfully."""
-    mock_name_and_uid.return_value = ("test_user", "test_uid")
-    mock_doc_ref = MagicMock()
-    mock_doc_ref.get.return_value.exists = False
-    mock_db.collection.return_value.document.return_value = mock_doc_ref
-
-    from v1.route import firebase_add_new_route
-
-    input_data = Add_New_Route(
-        route_name="test_route",
-        stops=["stop1", "stop2"],
-        start="start",
-        end="end",
-        timing={"time": "10:00", "stop_name": "start"} 
-    )
-
-    response = firebase_add_new_route(input_data, "test_token")
-
-    assert response.message == "Document created successfully with initial timing"
-    mock_doc_ref.set.assert_called_once()
+from google.api_core.exceptions import Conflict
 
 @patch('v1.common.firebase.db')
 def test_get_routes_success(mock_db, client):
@@ -48,7 +24,6 @@ def test_add_new_route_success(mock_name_and_uid, mock_db, client):
     """
     mock_name_and_uid.return_value = ("test_user", "test_uid")
     mock_doc_ref = MagicMock()
-    mock_doc_ref.get.return_value.exists = False
     mock_db.collection.return_value.document.return_value = mock_doc_ref
 
     response = client.post("/v1/route/add", json={
@@ -60,7 +35,7 @@ def test_add_new_route_success(mock_name_and_uid, mock_db, client):
     }, headers={"Authorization": "Bearer test_token"})
 
     assert response.status_code == 200
-    mock_doc_ref.set.assert_called_once()
+    mock_doc_ref.create.assert_called_once()
 
 @patch('v1.common.firebase.db')
 def test_add_new_route_conflict(mock_db, client):
@@ -69,7 +44,7 @@ def test_add_new_route_conflict(mock_db, client):
     The conftest.py mock for get_admin_details will fix the 401.
     """
     mock_doc_ref = MagicMock()
-    mock_doc_ref.get.return_value.exists = True
+    mock_doc_ref.create.side_effect = Conflict("Document already exists")
     mock_db.collection.return_value.document.return_value = mock_doc_ref
 
     response = client.post("/v1/route/add", json={

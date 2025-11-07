@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Body, HTTPException , status, Depends
+from google.api_core.exceptions import Conflict
 from v1.common.decorators import log_activity, verify_id_token, is_authenticated
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 import v1.common.response_base as response_base
@@ -9,17 +10,17 @@ import logging
 logger = logging.getLogger(__name__)
 routes_router = APIRouter(prefix="/route", tags=["Routes"])
 
-def firebase_add_new_route(input: response_base.Add_New_Route, token: str) -> response_base.FireBaseResponse:
+@routes_router.post("/add")
+@log_activity
+@verify_id_token
+@is_authenticated
+def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = Depends(common.get_token_from_header)) -> response_base.FireBaseResponse:
     """
-    Create a new document in busRoutes/{route_name} with the specified fields.
+    Adds a new bus route to the database. This function is now atomic and
+    handles race conditions by using the `create` method.
     """
     doc_ref = firebase.db.collection("busRoutes").document(input.route_name)
     try:
-        doc = doc_ref.get()
-        if doc.exists:
-             logger.warning(f"Route '{input.route_name}' already exists.")
-             raise Exception(f"{status.HTTP_409_CONFLICT} Document Exists, Update it")
-
         name, uid = firebase.Name_and_UID(token)
         document_data = {
             "lastUpdated": SERVER_TIMESTAMP,
@@ -30,52 +31,26 @@ def firebase_add_new_route(input: response_base.Add_New_Route, token: str) -> re
             "timing": [input.timing],
             "lastUpdatedBy": f"{name} ({uid})"
         }
-        doc_ref.set(document_data)
+        doc_ref.create(document_data)  # Atomic create
         created_doc = doc_ref.get()
         response_data = created_doc.to_dict()
         logger.info(f"Route '{input.route_name}' created successfully.")
         return response_base.FireBaseResponse(
             message="Document created successfully with initial timing",
-            data=response_data # type: ignore
+            data=response_data
+        )
+    except Conflict:
+        logger.warning(f"Route '{input.route_name}' already exists.")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Route '{input.route_name}' already exists."
         )
     except Exception as e:
         logger.error(f"Failed to create route '{input.route_name}': {e}")
-        status_code = getattr(e, "status_code", 500)
-        error = str(e)
-        raise HTTPException(
-            status_code=int(status_code),
-            detail={
-                "message": "Failed to create document",
-                "error": error
-            }
-        )
-
-@routes_router.post("/add")
-@log_activity
-@verify_id_token
-@is_authenticated
-def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = Depends(common.get_token_from_header)) -> response_base.FireBaseResponse:
-    doc_ref = firebase.db.collection("busRoutes").document(input.route_name)
-    try:
-        doc = doc_ref.get()
-        if doc.exists:
-            logger.warning(f"Route '{input.route_name}' already exists.")
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Document Exists, Update it"
-            )
-
-        logger.info(f"Adding new route: {input.route_name}")
-        return firebase_add_new_route(input,token)
-    
-    except HTTPException as he:
-        raise he
-    except Exception as e:
-        logger.error(f"Error adding timing entry for route '{input.route_name}': {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
-                "message": "Error adding timing entry",
+                "message": "Failed to create document",
                 "error": str(e)
             }
         )
