@@ -142,9 +142,9 @@ def generate_real_custom_token():
             print(f"⚠️ Warning: Could not copy to clipboard. ({e})")
             print("You may need to install 'xclip' or 'xsel' on Linux.")
 
-        print(f"\nYour FINAL ID Token (do not share publicly):\n")
-        print(bearer_token)
-        print("\nThis is ready to be pasted into your Postman 'token' variable.")
+        print(f"\nYour FINAL ID Token (copied to clipboard).")
+        print("⚠️ For security, the full token is not printed to the console. Use your clipboard to paste it as needed.")
+        print("\nTreat this token as a secret. Do not share or expose.")
 
     except json.JSONDecodeError:
         print(f"\n❌ An error occurred: Invalid JSON")
