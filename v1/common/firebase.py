@@ -2,6 +2,7 @@ import logging
 from os import getenv
 from json import loads
 from fastapi import HTTPException, status
+import firebase_admin
 from firebase_admin import credentials, initialize_app, firestore, auth
 
 # Logging for Firebase initialization
@@ -12,19 +13,39 @@ db = None
 
 def initialize_firebase():
     global firebase_app, db
-    # Ensure that the environment variable FIREBASE_CREDENTIALS_JSON is set
+    
+    # 1. Get the env var
     firebase_credentials_json = getenv('FIREBASE_CREDENTIALS_JSON')
     if not firebase_credentials_json:
-        logger.error("FIREBASE_CREDENTIALS_JSON is not set in environment variables")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="FIREBASE_CREDENTIALS_JSON is not set in environment variables"
-        )
-    cred_dict = loads(firebase_credentials_json)
-    cred = credentials.Certificate(cred_dict)
-    firebase_app = initialize_app(cred)
-    db = firestore.client()
-    logger.info("Firebase initialized successfully")
+        logger.error("FIREBASE_CREDENTIALS_JSON is not set in environment variables! App cannot start.")
+        # Raising HTTPException here will fail. Raise a standard error to stop the app.
+        raise ValueError("FIREBASE_CREDENTIALS_JSON is not set in environment variables")
+        
+    # 2. THIS IS THE CRITICAL FIX:
+    # Replace the unescaped newlines \n with escaped newlines \\n
+    fixed_json_string = firebase_credentials_json.replace("\n", "\\n")
+
+    # 3. Parse the *fixed* string and add error handling
+    try:
+        cred_dict = loads(fixed_json_string)
+    except Exception as e:
+        logger.error(f"Failed to parse Firebase credentials JSON. Error: {e}")
+        # Log the start of the string for debugging, but NOT the whole key
+        logger.error(f"String started with: {fixed_json_string[:100]}")
+        raise # Re-raise the exception to stop the app
+
+    # 4. Add a check to prevent re-initializing the app,
+    # which causes a crash when uvicorn reloads
+    if not firebase_admin._apps:
+        cred = credentials.Certificate(cred_dict)
+        firebase_app = initialize_app(cred)
+        db = firestore.client()
+        logger.info("Firebase initialized successfully")
+    else:
+        logger.warning("Firebase app already initialized. Skipping.")
+        # Ensure 'db' is set, especially on reload
+        if not db:
+            db = firestore.client()
 
 def verify_token(id_token):
     try:

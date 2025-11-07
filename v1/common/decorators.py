@@ -1,8 +1,8 @@
 from functools import wraps
-import asyncio
 from fastapi import HTTPException, status
 import v1.common.firebase as firebase
 import logging
+import inspect
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ def log_activity(func):
         logger.info(f"{func.__name__} returned {result}")
         return result
 
-    if asyncio.iscoroutinefunction(func):
+    if inspect.iscoroutinefunction(func):
         return async_wrapper
     else:
         return sync_wrapper
@@ -74,7 +74,7 @@ def verify_id_token(func):
             )
         return await func(*args, **kwargs)
 
-    if asyncio.iscoroutinefunction(func):
+    if inspect.iscoroutinefunction(func):
         return async_wrapper
     else:
         return sync_wrapper
@@ -104,7 +104,7 @@ def  is_authenticated(func):
             )
         return await func(*args, **kwargs)
 
-    if asyncio.iscoroutinefunction(func):
+    if inspect.iscoroutinefunction(func):
         return async_wrapper
     else:
         return sync_wrapper
@@ -134,7 +134,7 @@ def is_admin(func):
             )
         return await func(*args, **kwargs)
 
-    if asyncio.iscoroutinefunction(func):
+    if inspect.iscoroutinefunction(func):
         return async_wrapper
     else:
         return sync_wrapper
