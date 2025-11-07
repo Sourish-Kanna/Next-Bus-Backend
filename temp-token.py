@@ -59,7 +59,7 @@ def get_id_token_from_custom_token(custom_token, web_api_key):
             print("❌ ERROR: 'idToken' not found in API response.")
             # DO NOT log sensitive API response data
             if "error" in data and isinstance(data["error"], dict):
-                print(f"API error: {data['error'].get('message', 'Unknown error')}")
+                print("API returned an error (details suppressed for security).")
             else:
                 print("API returned an unexpected error format.")
             return None
