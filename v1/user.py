@@ -27,6 +27,8 @@ def get_user_details(token: str = Depends(common.get_token_from_header)):
             message="User details fetched successfully",
             data=detail,
         )
+    except HTTPException as he:
+        raise he
     except Exception as e:
         logger.error(f"Failed to fetch user details: {e}")
         raise HTTPException(

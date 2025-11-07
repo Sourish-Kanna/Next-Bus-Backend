@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "ms-python.vscode-pylance",
+        "njpwerner.autodocstring",
+        "ms-python.pytest",
+        "ms-python.unittest"
+    ]
+}

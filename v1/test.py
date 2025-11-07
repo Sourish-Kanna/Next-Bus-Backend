@@ -20,7 +20,7 @@ def verify_firebase_token(token: str = Depends(common.get_token_from_header)) ->
         return response_base.FireBaseResponse(
             message="Token is valid",
             data={
-                "user_id": decoded_token.get("user_id", ""),
+                "user_id": decoded_token.get("uid", ""),  # Changed from user_id to uid
             },
         )
     except Exception as e:
