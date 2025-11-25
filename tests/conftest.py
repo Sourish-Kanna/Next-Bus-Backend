@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch
+import os
 
 @pytest.fixture(scope="session")
 def client():
@@ -31,8 +32,11 @@ def client():
          patch("v1.common.firebase.get_admin_details", return_value=mock_admin_details_payload) as mock_get_admin:
         
         # Now that mocks are active, we can safely import the app
+        # When running tests, ensure the app loads development routes
+        os.environ["DEV_ENV"] = "true"  # ensure test routes are included
         from main import app
         
         # Yield the client for the tests to use
         with TestClient(app) as test_client:
+            # debug: what routes are registered
             yield test_client

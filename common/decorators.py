@@ -1,6 +1,6 @@
 from functools import wraps
 from fastapi import HTTPException, status
-import v1.common.firebase as firebase
+import common.firebase as firebase
 import logging
 import inspect
 

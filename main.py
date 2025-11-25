@@ -1,13 +1,13 @@
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-import v1.common.firebase as firebase
+import common.firebase as firebase
 import v1
 import logging
-import os
-import dotenv
+from common.config import load_env, resolve_origins, get_env
 
-dotenv.load_dotenv()
+# Load dev env only when DEV_ENV=true
+load_env()
 
 # Configure logging
 logging.basicConfig(
@@ -33,16 +33,12 @@ async def lifespan(app: FastAPI):
 # --- Pass the lifespan function to your app ---
 app = FastAPI(lifespan=lifespan)
 
-if os.getenv("DEV_ENV", "false").lower() == "true":
+if get_env("DEV_ENV", "false") == "true":
     logger.info("Loading Dev env....")
 else:
     logger.info("Loading Production env....")
 
-origin_list_str = os.getenv("ORIGIN_LIST")
-if origin_list_str == "*":
-    origin_list = ["*"]
-else:
-    origin_list = origin_list_str.split(",") if origin_list_str else []
+origin_list = resolve_origins()
 logger.info(f"Allowed origins: {origin_list}")
 
 # Configure CORS

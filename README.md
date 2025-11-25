@@ -64,6 +64,16 @@ next-bus-backend/
 
 Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
 
-## License
+## Environment setup
 
-This project is licensed under the MIT License.
+This project uses environment variables for configuration. It uses `FIREBASE_CREDENTIALS_JSON` (stringified JSON) for Firebase service account credentials.
+
+Key environment variables you might set locally or in your host provider (e.g., Render):
+
+- `DEV_ENV` - Set to `true` to load `dev.env` locally. When `DEV_ENV` is not `true`, the app will not load `dev.env` automatically.
+- `ORIGIN_LIST` - Comma-separated list of allowed CORS origins. Use `*` to allow any origin (not recommended for production).
+- `FIREBASE_CREDENTIALS_JSON` - JSON contents of the Firebase service account, provided when file path is not available.
+- `FIREBASE_WEB_API_KEY` - Firebase web API key for client-side interactions (dev only).
+- `FIREBASE_TEST_USER_ID` - Optional dev-only test user ID.
+
+Local development example: copy `.env.example` to `dev.env`, fill in values, and set `DEV_ENV=true` to have the application load it. Do not commit `dev.env` or any private key files to the repository. Place credentials in a secure store when deploying (Render/GCP/Github Secrets).

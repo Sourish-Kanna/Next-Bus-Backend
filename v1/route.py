@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Body, HTTPException , status, Depends
 from google.api_core.exceptions import Conflict
-from v1.common.decorators import log_activity, verify_id_token, is_authenticated
+from common.decorators import log_activity, verify_id_token, is_authenticated
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
-import v1.common.response_base as response_base
-import v1.common.firebase as firebase
-import v1.common as common
+import common.response_base as response_base
+import common.firebase as firebase
+import common as common
 import logging
 
 logger = logging.getLogger(__name__)
