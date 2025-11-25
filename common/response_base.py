@@ -12,7 +12,7 @@ class Add_New_Route(BaseModel):
     stops: list[str]
     start: str
     end: str
-    timing: dict
+    timing: str
 
 class Firebase_Add_New_Time(BaseModel):
     route_name: str

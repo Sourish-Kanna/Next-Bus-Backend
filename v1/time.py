@@ -93,7 +93,7 @@ def firebase_add_new_time(input: response_base.Firebase_Add_New_Time, token: str
             }
         )
 
-@timing_router.post("/update")
+@timing_router.put("/update")
 @log_activity
 @verify_id_token
 @is_authenticated

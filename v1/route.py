@@ -28,7 +28,13 @@ def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = D
             "RouteStops": input.stops,
             "RouteStart": input.start,
             "RouteEnd": input.end,
-            "timing": [input.timing],
+            "timing": [{
+                "time": input.timing, 
+                "delay_by": 0, 
+                "deviation_sum": 0, 
+                "deviation_count": 1, 
+                "stop_name": input.start
+                }],
             "lastUpdatedBy": f"{name} ({uid})"
         }
         doc_ref.create(document_data)  # Atomic create

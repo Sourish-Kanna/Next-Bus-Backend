@@ -7,9 +7,11 @@ import requests
 from dotenv import load_dotenv
 
 # --- CONFIGURATION ---
+# Run it in the 'dev-related' folder.
+# Make sure you have a 'dev.env' file in the root folder with the necessary environment variables.
 
-# Load environment variables from a .env file (optional, but good practice)
-load_dotenv()
+# Load environment variables from dev.env in root file
+load_dotenv(dotenv_path="../dev.env")
 
 # IMPORTANT:
 # 1. Set an environment variable named 'FIREBASE_CREDENTIALS_JSON'
