@@ -19,6 +19,7 @@ def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = D
     Adds a new bus route to the database. This function is now atomic and
     handles race conditions by using the `create` method.
     """
+    logger.info(f"Attempting to create new route: {input.route_name}")
     doc_ref = firebase.db.collection("busRoutes").document(input.route_name)
     try:
         name, uid = firebase.Name_and_UID(token)

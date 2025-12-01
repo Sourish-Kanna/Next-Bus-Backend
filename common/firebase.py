@@ -1,5 +1,5 @@
 import logging
-from os import getenv, path
+from os import getenv
 from json import loads
 from fastapi import HTTPException, status
 import firebase_admin
@@ -106,6 +106,7 @@ def get_admin_details(token):
             is_logged_in = False
             is_admin = False
             is_guest = False
+            logger.warning(f"Unrecognized sign-in provider: {sign_in_provider}")
 
         user_details = {
             "isAdmin": is_admin,
