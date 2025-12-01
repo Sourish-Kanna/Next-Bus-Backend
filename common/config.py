@@ -41,4 +41,4 @@ def resolve_origins():
     origin_list_str = os.getenv("ORIGIN_LIST")
     if origin_list_str == "*":
         return ["*"]
-    return origin_list_str.split(",") if origin_list_str else []
+    return [origin.strip() for origin in origin_list_str.split(",") if origin.strip()]
