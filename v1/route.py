@@ -16,8 +16,7 @@ routes_router = APIRouter(prefix="/route", tags=["Routes"])
 @is_authenticated
 def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = Depends(common.get_token_from_header)) -> response_base.FireBaseResponse:
     """
-    Adds a new bus route to the database. This function is now atomic and
-    handles race conditions by using the `create` method.
+    Adds a new bus route to the database.
     """
     logger.info(f"Attempting to create new route: {input.route_name}")
     doc_ref = firebase.db.collection("busRoutes").document(input.route_name)
@@ -39,12 +38,17 @@ def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = D
             "lastUpdatedBy": f"{name} ({uid})"
         }
         doc_ref.create(document_data)  # Atomic create
+        
         created_doc = doc_ref.get()
         response_data = created_doc.to_dict()
+        
+        # [LOGGING] Audit the creation of a new route
+        firebase.log_to_firestore("ROUTE_CREATED", {"route": input.route_name}, uid, "INFO")
+        
         logger.info(f"Route '{input.route_name}' created successfully.")
         return response_base.FireBaseResponse(
             message="Document created successfully with initial timing",
-            data=response_data
+            data=response_data # type: ignore
         )
     except Conflict:
         logger.warning(f"Route '{input.route_name}' already exists.")
@@ -53,6 +57,9 @@ def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = D
             detail=f"Route '{input.route_name}' already exists."
         )
     except Exception as e:
+        # [LOGGING] Log failure to Firestore
+        firebase.log_to_firestore("ERROR_CREATE_ROUTE", {"route": input.route_name, "error": str(e)}, "SYSTEM", "ERROR")
+        
         logger.error(f"Failed to create route '{input.route_name}': {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
