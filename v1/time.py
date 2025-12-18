@@ -5,9 +5,33 @@ import common.response_base as response_base
 import common.firebase as firebase
 import common as common
 import logging
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 timing_router = APIRouter(prefix="/timings", tags=["Timings"])
+
+# --- [NEW] Helper for ML Data Collection ---
+def save_historical_data(route_name: str, reported_time: str, official_time: str, delay: float, user_id: str):
+    """
+    Saves the raw individual report to 'historicalData' for future ML training.
+    Does NOT overwrite; always creates a new document.
+    """
+    try:
+        # Calculate day of week and hour for ML features
+        now = datetime.now(timezone.utc)
+        
+        firebase.db.collection("historicalData").add({
+            "timestamp": SERVER_TIMESTAMP,
+            "dayOfWeek": now.weekday(), # 0=Monday, 6=Sunday
+            "hourOfDay": now.hour,
+            "route": route_name,
+            "reportedTime": reported_time,
+            "officialTime": official_time,
+            "calculatedDelay": delay,
+            "userId": user_id
+        })
+    except Exception as e:
+        logger.error(f"Failed to save historical data: {e}")
 
 def firebase_update_time(input: response_base.Firebase_Update_Time, token: str ) -> response_base.FireBaseResponse:
     """
@@ -21,28 +45,79 @@ def firebase_update_time(input: response_base.Firebase_Update_Time, token: str )
             logger.warning(f"Route '{input.route_name}' does not exist for timing update.")
             raise Exception(f"{status.HTTP_404_NOT_FOUND} Document Does not exist, Create it first")
         
-        time = doc.to_dict().get("timing", []) # type: ignore
+        doc_dict = doc.to_dict()
+        
+        # --- [START] Rate Limiting Logic ---
+        last_updated_by = doc_dict.get("lastUpdatedBy", "") # type: ignore
+        last_updated_ts = doc_dict.get("lastUpdated") # type: ignore
+        
+        if f"{name} ({uid})" == last_updated_by and last_updated_ts:
+            now = datetime.now(timezone.utc)
+            if last_updated_ts.tzinfo is None:
+                last_updated_ts = last_updated_ts.replace(tzinfo=timezone.utc)
+                
+            diff = (now - last_updated_ts).total_seconds()
+            
+            if diff < 60:
+                # [LOGGING] Critical Action: Log this to Firestore so we can track spammers
+                firebase.log_to_firestore("RATE_LIMIT_HIT", {"route": input.route_name}, uid, "WARNING")
+                
+                logger.warning(f"Rate limit hit for user {uid} on route {input.route_name}")
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="You are updating too fast. Please wait a minute."
+                )
+        # --- [END] Rate Limiting Logic ---
+
+        time = doc_dict.get("timing", []) # type: ignore
+        current_delay = 0
+        
         for t in time:
             if t.get("time") == input.list_time:
-                t["deviation_sum"] += common.seconds_difference(input.list_time, input.timing)
+                # Calculate the specific delay for this report
+                this_entry_delay = common.seconds_difference(input.list_time, input.timing)
+                
+                # Update the running average (for the App UI)
+                t["deviation_sum"] += this_entry_delay
                 t["deviation_count"] += 1
                 avg = t.get("deviation_sum") / t.get("deviation_count")
                 t["delay_by"] = avg
+                
+                current_delay = this_entry_delay
                 break
 
+        # 1. Update the Main Route Document (For App UI)
         document = {
             "timing": time,
             "lastUpdated": SERVER_TIMESTAMP,
             "lastUpdatedBy": f"{name} ({uid})"
-            }
+        }
         doc_ref.update(document)
-        logger.info(f"Timing entry updated for route '{input.route_name}'.")
+
+        # 2. [LOGGING] Standard Info: Log to Cloud Logging (Stdout) ONLY to save money
+        logger.info(f"Timing entry updated for route '{input.route_name}' by {uid}.")
+
+        # 3. [ML] Save Historical Data (Essential for future AI)
+        # We keep this write because it is high-value data.
+        save_historical_data(
+            route_name=input.route_name,
+            reported_time=input.timing,
+            official_time=input.list_time,
+            delay=current_delay,
+            user_id=uid
+        )
+
         return response_base.FireBaseResponse(
             message="Timing entry updated successfully",
             data={"timing": input.timing}
         )
              
+    except HTTPException as he:
+        raise he 
     except Exception as e:
+        # [LOGGING] Critical Error: Log to Firestore so we can debug later
+        firebase.log_to_firestore("ERROR_UPDATE_TIMING", {"route": input.route_name, "error": str(e)}, "SYSTEM", "ERROR")
+        
         logger.error(f"Failed to update timing for route '{input.route_name}': {e}")
         status_code = getattr(e, "status_code", 500)
         error = str(e)
@@ -109,7 +184,7 @@ def update_time(input: response_base.Update_Time = Body(...), token:str = Depend
             )
 
         doc_dict = doc.to_dict()
-        timing = doc_dict.get("timing", [])
+        timing = doc_dict.get("timing", []) # type: ignore
         input_time = input.timing
         
         # Convert 24-hour times to 12-hour format for comparison

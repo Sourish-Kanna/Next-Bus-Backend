@@ -4,6 +4,7 @@ from json import loads
 from fastapi import HTTPException, status
 import firebase_admin
 from firebase_admin import credentials, initialize_app, firestore, auth
+from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 
 # Logging for Firebase initialization
 logger = logging.getLogger(__name__)
@@ -42,8 +43,6 @@ def initialize_firebase():
         logger.warning("Firebase app already initialized; skipping initialization")
         if not db:
             db = firestore.client()
-
-        
 
 def verify_token(id_token):
     try:
@@ -122,3 +121,24 @@ def get_admin_details(token):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Token verification failed: {e}"
         )
+
+# --- [NEW] Helper for System Logging (Audit Trails) ---
+def log_to_firestore(action: str, details: dict, user_id: str, level: str = "INFO"):
+    """
+    Saves a system log to the 'systemLogs' collection in Firestore.
+    Used ONLY for Warnings, Errors, or Critical Actions to save costs.
+    """
+    try:
+        if db is not None:
+            db.collection("systemLogs").add({
+                "timestamp": SERVER_TIMESTAMP,
+                "action": action,
+                "level": level,
+                "userId": user_id,
+                "details": details
+            })
+        else:
+            logger.warning("Firestore DB not initialized, skipping log_to_firestore")
+    except Exception as e:
+        # Never fail the main request just because logging failed
+        logger.error(f"Failed to write system log: {e}")
