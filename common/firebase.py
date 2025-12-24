@@ -17,7 +17,6 @@ def initialize_firebase():
     cred = None
     cred_dict = None
     
-    # Fallback: use FIREBASE_CREDENTIALS_JSON (string in environment)
     firebase_credentials_json = getenv("FIREBASE_CREDENTIALS_JSON")
     if not firebase_credentials_json:
         logger.error("No Firebase credentials found: set FIREBASE_CREDENTIALS_JSON")
@@ -25,7 +24,6 @@ def initialize_firebase():
     try:
         cred_dict = loads(firebase_credentials_json)
     except Exception:
-        # Try to fix common escape issues (escaped newlines)
         try:
             fixed_json = firebase_credentials_json.replace("\\n", "\n")
             cred_dict = loads(fixed_json)
@@ -34,7 +32,6 @@ def initialize_firebase():
             raise
     cred = credentials.Certificate(cred_dict)
 
-    # Initialize firebase app if not already initialized
     if not firebase_admin._apps:
         firebase_app = initialize_app(cred)
         db = firestore.client()
@@ -122,23 +119,22 @@ def get_admin_details(token):
             detail=f"Token verification failed: {e}"
         )
 
-# --- [NEW] Helper for System Logging (Audit Trails) ---
-def log_to_firestore(action: str, details: dict, user_id: str, level: str = "INFO"):
-    """
-    Saves a system log to the 'systemLogs' collection in Firestore.
-    Used ONLY for Warnings, Errors, or Critical Actions to save costs.
-    """
-    try:
-        if db is not None:
-            db.collection("systemLogs").add({
-                "timestamp": SERVER_TIMESTAMP,
-                "action": action,
-                "level": level,
-                "userId": user_id,
-                "details": details
-            })
-        else:
-            logger.warning("Firestore DB not initialized, skipping log_to_firestore")
-    except Exception as e:
-        # Never fail the main request just because logging failed
-        logger.error(f"Failed to write system log: {e}")
+# def log_to_firestore(action: str, details: dict, user_id: str, level: str = "INFO"):
+#     """
+#     Saves a system log to the 'systemLogs' collection in Firestore.
+#     Used ONLY for Warnings, Errors, or Critical Actions to save costs.
+#     """
+#     try:
+#         if db is not None:
+#             db.collection("systemLogs").add({
+#                 "timestamp": SERVER_TIMESTAMP,
+#                 "action": action,
+#                 "level": level,
+#                 "userId": user_id,
+#                 "details": details
+#             })
+#         else:
+#             logger.warning("Firestore DB not initialized, skipping log_to_firestore")
+#     except Exception as e:
+#         # Never fail the main request just because logging failed
+#         logger.error(f"Failed to write system log: {e}")

@@ -1,18 +1,18 @@
 from fastapi import APIRouter, Body, HTTPException , status, Depends
 from google.api_core.exceptions import Conflict
-from common.decorators import log_activity, verify_id_token, is_authenticated
+from common.decorators import log_activity, is_authenticated
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 import common.response_base as response_base
 import common.firebase as firebase
 import common as common
 import logging
+from v1.future import save_historical_data
 
 logger = logging.getLogger(__name__)
 routes_router = APIRouter(prefix="/route", tags=["Routes"])
 
 @routes_router.post("/add")
 @log_activity
-# @verify_id_token
 @is_authenticated
 def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = Depends(common.get_token_from_header)) -> response_base.FireBaseResponse:
     """
@@ -22,6 +22,13 @@ def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = D
     doc_ref = firebase.db.collection("busRoutes").document(input.route_name)
     try:
         name, uid = firebase.Name_and_UID(token)
+        save_historical_data(
+            route_name=input.route_name,
+            reported_time=input.timing,
+            official_time=input.timing,
+            delay=0,
+            user_id=uid
+        )
         document_data = {
             "lastUpdated": SERVER_TIMESTAMP,
             "RouteName": input.route_name,
@@ -42,8 +49,7 @@ def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = D
         created_doc = doc_ref.get()
         response_data = created_doc.to_dict()
         
-        # [LOGGING] Audit the creation of a new route
-        firebase.log_to_firestore("ROUTE_CREATED", {"route": input.route_name}, uid, "INFO")
+        # firebase.log_to_firestore("ROUTE_CREATED", {"route": input.route_name}, uid, "INFO")
         
         logger.info(f"Route '{input.route_name}' created successfully.")
         return response_base.FireBaseResponse(
@@ -57,8 +63,7 @@ def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = D
             detail=f"Route '{input.route_name}' already exists."
         )
     except Exception as e:
-        # [LOGGING] Log failure to Firestore
-        firebase.log_to_firestore("ERROR_CREATE_ROUTE", {"route": input.route_name, "error": str(e)}, "SYSTEM", "ERROR")
+        # firebase.log_to_firestore("ERROR_CREATE_ROUTE", {"route": input.route_name, "error": str(e)}, "SYSTEM", "ERROR")
         
         logger.error(f"Failed to create route '{input.route_name}': {e}")
         raise HTTPException(
@@ -80,9 +85,14 @@ def get_routes() -> response_base.FireBaseResponse:
         routes_ref = firebase.db.collection("busRoutes")
         routes = routes_ref.stream()
         all_routes = [route.id for route in routes]
+        if all_routes is None or len(all_routes) == 0:
+            all_routes = []
+            message = "No routes found"
+        else:
+            message = "Routes fetched successfully"
         logger.info(f"All routes fetched successfully: {all_routes}")
         return response_base.FireBaseResponse(
-            message="All routes fetched successfully",
+            message=message,
             data=all_routes
         )
     except Exception as e:

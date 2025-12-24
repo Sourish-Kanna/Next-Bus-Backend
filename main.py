@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import common.firebase as firebase
@@ -12,7 +12,7 @@ load_env()
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format="%(levelname)s:     %(message)s"
+    format="%(levelname)s:\t%(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -33,10 +33,8 @@ async def lifespan(app: FastAPI):
 # --- Pass the lifespan function to your app ---
 app = FastAPI(lifespan=lifespan)
 
-if get_env("DEV_ENV", "false") == "true":
-    logger.info("Loading Dev env....")
-else:
-    logger.info("Loading Production env....")
+if get_env("DEV_ENV", "false") == "true": logger.info("Loading Dev env....") 
+else: logger.info("Loading Production env....")
 
 origin_list = resolve_origins()
 logger.info(f"Allowed origins: {origin_list}")
@@ -56,15 +54,13 @@ app.add_middleware(
 def root(request: Request):
     if request.method == "HEAD":
         logger.info("Root endpoint called with HEAD request")
-        return Response(status_code=200)
+        return Response(status_code=status.HTTP_200_OK)
     else:
         logger.info("Root endpoint called with GET request")
         return {"message": "Welcome to the API!"}
 
-# Silent favicon handler (no 404, no docs entry)
 @app.get("/favicon.ico", include_in_schema=False)
-async def favicon() -> Response:
-    return Response(status_code=204)  # 204 = No Content
+def favicon() -> Response:
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-# Including the version 1 router in the main app
 app.include_router(v1.ver_1)

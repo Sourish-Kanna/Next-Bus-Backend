@@ -33,7 +33,6 @@ def get_env(key: str, default=None, required=False):
         raise ValueError(f"Required environment variable '{key}' is not set")
     return val
 
-
 def resolve_origins():
     """Parse `ORIGIN_LIST` into a list usable by `CORSMiddleware`.
     If the env is a single `*`, return ["*"]. If empty return [].

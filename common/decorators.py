@@ -28,23 +28,6 @@ def log_activity(func):
     else:
         return sync_wrapper
 
-def extract_token_from_kwargs_or_header(args, kwargs):
-    # Try to get token from kwargs (FastAPI injects dependencies as kwargs)
-    token = kwargs.get("token")
-    if token:
-        return token
-    # Try to get token from request headers if available
-    for arg in args:
-        if hasattr(arg, "headers"):
-            auth_header = arg.headers.get("authorization")
-            if auth_header and auth_header.startswith("Bearer "):
-                return auth_header.split(" ", 1)[1]
-    logger.error("Missing or invalid Authorization header")
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Missing or invalid Authorization header"
-    )
-
 def verify_id_token(func):
     @wraps(func)
     def sync_wrapper(*args, **kwargs):
@@ -138,4 +121,21 @@ def is_admin(func):
         return async_wrapper
     else:
         return sync_wrapper
-    
+
+# Helper function to extract token from kwargs or request headers 
+def extract_token_from_kwargs_or_header(args, kwargs):
+    # Try to get token from kwargs (FastAPI injects dependencies as kwargs)
+    token = kwargs.get("token")
+    if token:
+        return token
+    # Try to get token from request headers if available
+    for arg in args:
+        if hasattr(arg, "headers"):
+            auth_header = arg.headers.get("authorization")
+            if auth_header and auth_header.startswith("Bearer "):
+                return auth_header.split(" ", 1)[1]
+    logger.error("Missing or invalid Authorization header")
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Missing or invalid Authorization header"
+    )

@@ -12,11 +12,8 @@ user_router = APIRouter(prefix="/user", tags=["User"])
 @log_activity
 def get_user_details(token: str = Depends(common.get_token_from_header)):
     """Get User Details"""
-    # Extract UID early for logging purposes (safe fallback)
     user_uid = "unknown"
     try:
-        # We try to get the UID from the token just for logging, 
-        # even before the full admin check
         decoded = firebase.get_token_details(token)
         user_uid = decoded.get("uid", "unknown")
     except:
@@ -32,18 +29,14 @@ def get_user_details(token: str = Depends(common.get_token_from_header)):
                 detail="User details not found"
             )
         
-        # [LOGGING STRATEGY]
-        # 1. Admin Access: CRITICAL -> Log to Firestore (Audit Trail)
-        if detail.get("isAdmin") is True:
-            firebase.log_to_firestore(
-                action="ADMIN_ACCESS",
-                details={"provider": detail.get("sign_in_provider")},
-                user_id=user_uid,
-                level="WARNING" # Warning level highlights it in dashboards
-            )
+        # if detail.get("isAdmin") is True:
+        #     firebase.log_to_firestore(
+        #         action="ADMIN_ACCESS",
+        #         details={"provider": detail.get("sign_in_provider")},
+        #         user_id=user_uid,
+        #         level="WARNING"
+        #     )
         
-        # 2. Guest/Standard User: NORMAL -> Log to Cloud Logging (Stdout) ONLY
-        # This saves you money by not writing to Firestore for every single app open.
         logger.info(f"User details fetched successfully for {user_uid} (Admin: {detail.get('isAdmin')})")
         
         return response_base.FireBaseResponse(
@@ -53,13 +46,12 @@ def get_user_details(token: str = Depends(common.get_token_from_header)):
     except HTTPException as he:
         raise he
     except Exception as e:
-        # [LOGGING] Critical Error -> Log to Firestore
-        firebase.log_to_firestore(
-            action="ERROR_FETCH_USER",
-            details={"error": str(e)},
-            user_id=user_uid,
-            level="ERROR"
-        )
+        # firebase.log_to_firestore(
+        #     action="ERROR_FETCH_USER",
+        #     details={"error": str(e)},
+        #     user_id=user_uid,
+        #     level="ERROR"
+        # )
         
         logger.error(f"Failed to fetch user details: {e}")
         raise HTTPException(
