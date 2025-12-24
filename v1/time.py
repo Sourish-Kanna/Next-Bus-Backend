@@ -170,7 +170,7 @@ def firebase_add_new_time(input: response_base.Firebase_Add_New_Time, token: str
 
 @timing_router.put("/update")
 @log_activity
-@verify_id_token
+# @verify_id_token
 @is_authenticated
 def update_time(input: response_base.Update_Time = Body(...), token:str = Depends(common.get_token_from_header)) -> response_base.FireBaseResponse:
     try:
@@ -264,11 +264,17 @@ def get_time(route_name: str) -> response_base.FireBaseResponse:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Route not found"
             )
-        timing_data = [{"time":t.get("time"), "stop": t.get("stop_name"), "delay": t.get("delay_by")} for t in doc.to_dict().get("timing", [])]  # type: ignore
-        logger.info(f"Timing details fetched successfully for route '{route_name}': {timing_data}")
+        timing_data = [
+            {
+                "time":t.get("time"), 
+                "stop": t.get("stop_name"), 
+                "delay": t.get("delay_by")
+            } for t in doc.to_dict().get("timing", [])]  # type: ignore
+        sorted_timing = sorted(timing_data, key=lambda x: common.convert_to_24hr(x["time"]))
+        logger.info(f"Timing details fetched successfully for route '{route_name}': {len(timing_data)}")
         return response_base.FireBaseResponse(
             message="Timing details fetched successfully",
-            data=timing_data
+            data=sorted_timing
         )
     except Exception as e:
         logger.error(f"Failed to fetch timing details for route '{route_name}': {e}")

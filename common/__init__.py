@@ -11,7 +11,7 @@ def seconds_difference(t1: str, t2: str) -> int:
     dt1 = datetime.combine(today, datetime.strptime(t1, fmt).time())
     dt2 = datetime.combine(today, datetime.strptime(t2, fmt).time())
     diff = (dt2 - dt1).total_seconds()
-    logger.info(f"Calculated seconds difference between {t1} and {t2}: {diff}")
+    # logger.info(f"Calculated seconds difference between {t1} and {t2}: {diff}")
     return int(diff)
 
 def get_token_from_header(authorization: Optional[str] = Header(None)) -> str:
@@ -24,3 +24,11 @@ def get_token_from_header(authorization: Optional[str] = Header(None)) -> str:
     token = authorization.split(" ", 1)[1]
     logger.info("Extracted token from Authorization header")
     return token
+
+def convert_to_24hr(time_str: str) -> str:
+    in_format = "%I:%M %p"
+    out_format = "%H:%M"
+    dt = datetime.strptime(time_str, in_format)
+    converted_time = dt.strftime(out_format)
+    # logger.info(f"Converted time '{time_str}' to 24-hour format: '{converted_time}'")
+    return converted_time

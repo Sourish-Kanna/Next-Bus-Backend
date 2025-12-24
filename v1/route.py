@@ -12,7 +12,7 @@ routes_router = APIRouter(prefix="/route", tags=["Routes"])
 
 @routes_router.post("/add")
 @log_activity
-@verify_id_token
+# @verify_id_token
 @is_authenticated
 def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = Depends(common.get_token_from_header)) -> response_base.FireBaseResponse:
     """

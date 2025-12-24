@@ -12,7 +12,7 @@ def log_activity(func):
         filtered_kwargs = {k: v for k, v in kwargs.items() if k != "token"}
         logger.info(f"Called {func.__name__} with args={args} kwargs={filtered_kwargs}")        
         result = func(*args, **kwargs)
-        logger.info(f"{func.__name__} returned {result}")
+        # logger.info(f"{func.__name__} returned {result}")
         return result
 
     @wraps(func)
@@ -20,7 +20,7 @@ def log_activity(func):
         filtered_kwargs = {k: v for k, v in kwargs.items() if k != "token"}
         logger.info(f"Called {func.__name__} with args={args} kwargs={filtered_kwargs}")
         result = await func(*args, **kwargs)
-        logger.info(f"{func.__name__} returned {result}")
+        # logger.info(f"{func.__name__} returned {result}")
         return result
 
     if inspect.iscoroutinefunction(func):
