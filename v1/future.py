@@ -26,12 +26,12 @@ def save_historical_data(route_name: str, reported_time: str, official_time: str
     except Exception as e:
         logger.error(f"Failed to save historical data: {e}")
 
-def isRateLimitExceeded(token, route_name) -> bool:
+def isRateLimitExceeded(token:str, route_name:str, table:str) -> bool:
         """
         Checks if the user has updated the same route within the last minute.
         """
         name, uid = firebase.Name_and_UID(token)
-        doc_ref = firebase.db.collection("busRoutes").document(route_name)
+        doc_ref = firebase.db.collection(table).document(route_name)
         doc = doc_ref.get()
         doc_dict = doc.to_dict()
         last_updated_by = doc_dict.get("lastUpdatedBy", "") # type: ignore

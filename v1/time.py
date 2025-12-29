@@ -127,7 +127,7 @@ def update_time(input: response_base.Update_Time = Body(...), token:str = Depend
                 detail="Document Does not exist, Create it first"
             )
         
-        if isRateLimitExceeded(token, input.route_name):
+        if isRateLimitExceeded(token, input.route_name, "busRoutes"):
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail=f"You are updating too fast. Please wait a minute for route {input.route_name}"
