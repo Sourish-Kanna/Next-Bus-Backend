@@ -1,0 +1,4 @@
+[project]
+name = "nextbus-backend"
+version = "2.1.5-beta"
+requires-python = ">=3.12"
