@@ -1,6 +1,6 @@
 # Next Bus Backend ⚙️
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)
+![Python](https://img.shields.io/badge/Python-3.12%2B-blue?logo=python)
 ![FastAPI](https://img.shields.io/badge/FastAPI-black?logo=fastapi)
 [![Deploy on Render](https://img.shields.io/badge/Deploy-Render-black?logo=render)](https://render.com)
 
