@@ -31,7 +31,7 @@ async def lifespan(app: FastAPI):
     logger.info("Application is shutting down.")
 
 # --- Pass the lifespan function to your app ---
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, title="NextBus Backend", version="2.1.6")
 
 if get_env("DEV_ENV", "false") == "true": logger.info("Loading Dev env....") 
 else: logger.info("Loading Production env....")
