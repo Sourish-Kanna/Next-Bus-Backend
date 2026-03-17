@@ -29,11 +29,6 @@ click==8.3.1
     # via
     #   pip-tools
     #   uvicorn
-colorama==0.4.6
-    # via
-    #   build
-    #   click
-    #   pytest
 cryptography==46.0.5
     # via pyjwt
 fastapi==0.128.0
@@ -119,7 +114,7 @@ protobuf==6.33.5
     #   googleapis-common-protos
     #   grpcio-status
     #   proto-plus
-pyasn1==0.6.2
+pyasn1==0.6.3
     # via
     #   pyasn1-modules
     #   rsa
