@@ -15,7 +15,7 @@ services:
     sync: false
   region: oregon
   buildCommand: pip install -r requirements.txt
-  startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+  startCommand: uvicorn --app-dir src main:app --host 0.0.0.0 --port $PORT
   autoDeployTrigger: commit
 
 - type: web
@@ -32,6 +32,6 @@ services:
     sync: false
   region: oregon
   buildCommand: 'pip install -r requirements.txt '
-  startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+  startCommand: uvicorn --app-dir src main:app --host 0.0.0.0 --port $PORT
   autoDeployTrigger: commit
   healthCheckPath: /

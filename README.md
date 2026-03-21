@@ -182,7 +182,7 @@ ORIGIN_LIST=*
 1. **Run locally**
 
 ```bash
-uvicorn main:app --reload
+uvicorn --app-dir src main:app --reload
 ```
 
 API will be available at `http://127.0.0.1:8000`.
