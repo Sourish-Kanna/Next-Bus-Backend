@@ -202,7 +202,8 @@ def get_time(route_name: str) -> response_base.FireBaseResponse:
             {
                 "time":t.get("time"), 
                 "stop": t.get("stop_name"), 
-                "delay": t.get("delay_by")
+                "delay": t.get("delay_by"),
+                "count": t.get("deviation_count"),
             } for t in doc.to_dict().get("timing", [])]  # type: ignore
         sorted_timing = sorted(timing_data, key=lambda x: common.convert_to_24hr(x["time"]))
         logger.info(f"Timing details fetched successfully for route '{route_name}': {len(timing_data)}")
