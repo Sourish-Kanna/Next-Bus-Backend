@@ -1,4 +1,4 @@
-# Exported from Render on 2025-11-16T14:22:27Z
+# Exported from Render on 2026-03-21T10:29:09Z
 version: "1"
 services:
 
@@ -13,25 +13,29 @@ services:
     sync: false
   - key: FIREBASE_CREDENTIALS_JSON
     sync: false
+  - key: DEV_ENV
+    sync: false
   region: oregon
   buildCommand: pip install -r requirements.txt
   startCommand: uvicorn --app-dir src main:app --host 0.0.0.0 --port $PORT
+  healthCheckPath: /
   autoDeployTrigger: commit
 
 - type: web
   name: Next Bus (Development)
   runtime: python
   repo: https://github.com/Sourish-Kanna/Next-Bus-Backend
+  branch: main
   plan: free
   envVars:
   - key: ORIGIN_LIST
     sync: false
-  - key: DEV_ENV
-    sync: false
   - key: FIREBASE_CREDENTIALS_JSON
     sync: false
+  - key: DEV_ENV
+    sync: false
   region: oregon
-  buildCommand: 'pip install -r requirements.txt '
+  buildCommand: pip install -r requirements.txt
   startCommand: uvicorn --app-dir src main:app --host 0.0.0.0 --port $PORT
-  autoDeployTrigger: commit
   healthCheckPath: /
+  autoDeployTrigger: commit
