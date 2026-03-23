@@ -15,7 +15,28 @@
                 "main:app",
                 "--reload"
             ],
-            "jinja": true
+            "jinja": true,
+            "presentation": {
+                "hidden": true,
+            }
+        },
+        {
+            "name": "Chrome Debug",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:8000/docs",
+            "presentation": {
+                "hidden": true,
+            }
+        },
+    ],
+    "compounds": [
+        {
+            "name": "Debug",
+            "configurations": [
+                "Python Debugger: FastAPI",
+                "Chrome Debug"
+            ]
         }
     ]
 }

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, HTTPException , status, Depends
+from fastapi import APIRouter, Body, HTTPException , status, Depends, Query
 from common.decorators import log_activity, is_authenticated
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 import common.response_base as response_base
@@ -181,6 +181,117 @@ def update_time(input: response_base.Update_Time = Body(...), token:str = Depend
                 "error": str(e)
             }
         )
+
+# @timing_router.delete("/{route}")
+# @log_activity
+# @is_authenticated
+# def delete_timing_entry(
+#     route: str,
+#     time: str = Query(..., description="Entry time in format like 01:30 PM"),
+#     token: str = Depends(common.get_token_from_header)
+# ) -> response_base.FireBaseResponse:
+#     """
+#     Reverse one aggregated timing contribution for a route/time slot.
+#     """
+#     try:
+#         # Validate input time format early to provide a clear 400 error.
+#         try:
+#             common.convert_to_24hr(time)
+#         except Exception:
+#             raise HTTPException(
+#                 status_code=status.HTTP_400_BAD_REQUEST,
+#                 detail="Invalid time format. Use format like 01:30 PM"
+#             )
+
+#         doc_ref = firebase.db.collection("busRoutes").document(route)
+#         doc = doc_ref.get()
+
+#         if not doc.exists:
+#             logger.warning(f"Route '{route}' does not exist for delete_timing_entry endpoint.")
+#             raise HTTPException(
+#                 status_code=status.HTTP_404_NOT_FOUND,
+#                 detail="Route not found, Add it first"
+#             )
+
+#         route_data = doc.to_dict() or {}
+#         timings = route_data.get("timing", [])
+
+#         target_index = -1
+#         matched_time = None
+#         for i, entry in enumerate(timings):
+#             try:
+#                 diff = abs(common.seconds_difference(time, entry.get("time")))
+#                 if diff <= 300:  # Within 5 minutes, same as update_time matching rule
+#                     target_index = i
+#                     matched_time = entry.get("time")
+#                     break
+#             except Exception as e:
+#                 logger.warning(f"Time comparison failed in delete_timing_entry: {e}, continuing")
+#                 continue
+
+#         if target_index == -1:
+#             raise HTTPException(
+#                 status_code=status.HTTP_404_NOT_FOUND,
+#                 detail=f"Timing entry '{time}' not found for route '{route}'"
+#             )
+
+#         target = timings[target_index]
+#         current_sum = float(target.get("deviation_sum", 0) or 0)
+#         current_count = int(target.get("deviation_count", 0) or 0)
+#         this_entry_delay = float(target.get("delay_by", 0) or 0)
+
+#         if current_count <= 0:
+#             raise HTTPException(
+#                 status_code=status.HTTP_400_BAD_REQUEST,
+#                 detail=f"Timing entry '{time}' has zero reports; nothing to reverse"
+#             )
+
+#         new_sum = current_sum - this_entry_delay
+#         new_count = current_count - 1
+
+#         if new_count <= 0:
+#             timings.pop(target_index)
+#             target = {}
+#         else:
+#             if new_sum < 0:
+#                 new_sum = 0
+#             target["deviation_sum"] = new_sum
+#             target["deviation_count"] = new_count
+#             target["delay_by"] = new_sum / new_count
+
+#         name, uid = firebase.Name_and_UID(token)
+#         doc_ref.update({
+#             "timing": timings,
+#             "lastUpdated": SERVER_TIMESTAMP,
+#             "lastUpdatedBy": f"{name} ({uid})"
+#         })
+
+#         logger.info(f"Timing entry '{time}' reversed for route '{route}' by {uid}.")
+#         message = "Timing entry deleted successfully" if new_count <= 0 else "Timing entry reversed successfully"
+#         return response_base.FireBaseResponse(
+#             message=message,
+#             data={
+#                 "route": route,
+#                 "requested_time": time,
+#                 "matched_time": matched_time,
+#                 "deleted": new_count <= 0,
+#                 "deviation_sum": target.get("deviation_sum", 0),
+#                 "deviation_count": target.get("deviation_count"),
+#                 "delay_by": target.get("delay_by")
+#             }
+#         )
+
+#     except HTTPException as he:
+#         raise he
+#     except Exception as e:
+#         logger.error(f"Failed to reverse timing entry '{time}' for route '{route}': {e}")
+#         raise HTTPException(
+#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             detail={
+#                 "message": "Failed to reverse timing entry",
+#                 "error": str(e)
+#             }
+#         )
 
 @timing_router.get("/{route_name}")
 @log_activity
