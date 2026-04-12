@@ -3,3 +3,4 @@
 pytest
 pyperclip
 pip-tools
+pytest-env==1.6.0
