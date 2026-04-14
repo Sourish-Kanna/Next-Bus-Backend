@@ -88,7 +88,7 @@ While no ML models are currently active:
 
 ---
 
-## 🧑‍💼 What This Backend Demonstrates (For Recruiters)
+## 🧑‍💼 What This Backend Demonstrates
 
 This repository demonstrates:
 
