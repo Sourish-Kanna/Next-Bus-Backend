@@ -57,7 +57,11 @@ def root(request: Request):
         return Response(status_code=status.HTTP_200_OK)
     else:
         logger.info("Root endpoint called with GET request")
-        return {"message": "Welcome to the API!"}
+        return {
+            "message": "Welcome to the API!", 
+            "version": "2.1.7",
+            "dev_env": get_env("DEV_ENV", "false") == "true"
+            }
 
 @app.get("/favicon.ico", include_in_schema=False)
 def favicon() -> Response:
