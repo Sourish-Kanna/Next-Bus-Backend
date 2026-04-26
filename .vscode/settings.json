@@ -1,6 +1,0 @@
-{
-    "python.testing.enabled": true,
-    "python.testing.pytestEnabled": true,
-    "python.testing.unittestEnabled": false,
-    "python.testing.autoTestDiscoverOnSaveEnabled": true
-}
