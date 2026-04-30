@@ -1,9 +1,5 @@
 {
-    // move to .vscode folder
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
+    "version": "0.2.0", // move to .vscode folder
     "configurations": [
         {
             "name": "Python Debugger: FastAPI",
@@ -18,7 +14,7 @@
             ],
             "jinja": true,
             "presentation": {
-                "hidden": true,
+                "hidden": true
             }
         },
         {
@@ -27,9 +23,9 @@
             "request": "launch",
             "url": "http://localhost:8000/docs",
             "presentation": {
-                "hidden": true,
+                "hidden": true
             }
-        },
+        }
     ],
     "compounds": [
         {
