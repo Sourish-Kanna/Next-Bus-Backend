@@ -1,17 +1,19 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, Request, status, Depends
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
-import common.response_base as response_base
+import common.response as response
 from common.decorators import log_activity
 import common.firebase as firebase
 import common as common
 import logging
+from main import limiter
 
 logger = logging.getLogger(__name__)
 user_router = APIRouter(prefix="/user", tags=["User"])
 
 @user_router.get("/get-user-details")
+@limiter.limit("10/minute")
 @log_activity
-def get_user_details(token: str = Depends(common.get_token_from_header)):
+def get_user_details(request: Request, token: str = Depends(common.get_token_from_header)):
     """Get User Details"""
     user_uid = "unknown"
     try:
@@ -40,7 +42,7 @@ def get_user_details(token: str = Depends(common.get_token_from_header)):
         
         logger.info(f"User details fetched successfully for {user_uid} (Admin: {detail.get('isAdmin')})")
         
-        return response_base.FireBaseResponse(
+        return response.FireBaseResponse(
             message="User details fetched successfully",
             data=detail,
         )
@@ -61,8 +63,9 @@ def get_user_details(token: str = Depends(common.get_token_from_header)):
         )
 
 @user_router.post("/sync")
+@limiter.limit("5/minute")
 @log_activity
-def sync_user(token: str = Depends(common.get_token_from_header)):
+def sync_user(request: Request, token: str = Depends(common.get_token_from_header)):
     """
     Called from the frontend right after Firebase Auth sign-in.
     Creates a user document in Firestore ONLY for permanent accounts (e.g., Google, Email).
@@ -79,7 +82,7 @@ def sync_user(token: str = Depends(common.get_token_from_header)):
         # 2. Block Anonymous Users
         if sign_in_provider == "anonymous":
             logger.info(f"Skipped database sync for anonymous user: {uid}")
-            return response_base.FireBaseResponse(
+            return response.FireBaseResponse(
                 message="Anonymous users are not saved to the database.",
                 data={"isNewUser": False, "isAnonymous": True}
             )
@@ -102,7 +105,7 @@ def sync_user(token: str = Depends(common.get_token_from_header)):
                 "lastLogin": SERVER_TIMESTAMP
             })
             logger.info(f"New permanent user registered in Firestore: {uid}")
-            return response_base.FireBaseResponse(
+            return response.FireBaseResponse(
                 message="User registered successfully",
                 data={"isNewUser": True, "isAnonymous": False}
             )
@@ -113,7 +116,7 @@ def sync_user(token: str = Depends(common.get_token_from_header)):
                 "name": name # Keep display name synced in case they changed it on Google
             })
             logger.info(f"Existing user logged in: {uid}")
-            return response_base.FireBaseResponse(
+            return response.FireBaseResponse(
                 message="User login recorded",
                 data={"isNewUser": False, "isAnonymous": False}
             )

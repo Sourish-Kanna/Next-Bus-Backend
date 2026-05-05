@@ -8,7 +8,7 @@ It sets up the main API router for version 1 and includes sub-routers for:
 All endpoints under this module are accessible with the `/v1` prefix.
 '''
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 from fastapi import APIRouter
 from .test import test_router

@@ -4,3 +4,4 @@
 pytest
 pyperclip
 pip-tools
+requests

@@ -53,6 +53,10 @@ cryptography==46.0.7
     #   -c requirements.txt
     #   google-auth
     #   pyjwt
+deprecated==1.3.1
+    # via
+    #   -c requirements.txt
+    #   limits
 fastapi==0.135.3
     # via
     #   -c requirements.txt
@@ -145,13 +149,19 @@ idna==3.11
     #   requests
 iniconfig==2.3.0
     # via pytest
+limits==5.8.0
+    # via
+    #   -c requirements.txt
+    #   slowapi
 msgpack==1.1.2
     # via
     #   -c requirements.txt
     #   cachecontrol
-packaging==26.1
+packaging==26.2
     # via
+    #   -c requirements.txt
     #   build
+    #   limits
     #   pytest
     #   wheel
 pip-tools==7.5.3
@@ -212,9 +222,14 @@ python-dotenv==1.2.2
 requests==2.33.1
     # via
     #   -c requirements.txt
+    #   -r requirements-dev.in
     #   cachecontrol
     #   google-api-core
     #   google-cloud-storage
+slowapi==0.1.9
+    # via
+    #   -c requirements.txt
+    #   -r requirements.in
 starlette==1.0.0
     # via
     #   -c requirements.txt
@@ -224,6 +239,7 @@ typing-extensions==4.15.0
     #   -c requirements.txt
     #   fastapi
     #   grpcio
+    #   limits
     #   pydantic
     #   pydantic-core
     #   typing-inspection
@@ -242,6 +258,10 @@ uvicorn==0.44.0
     #   -r requirements.in
 wheel==0.46.3
     # via pip-tools
+wrapt==2.1.2
+    # via
+    #   -c requirements.txt
+    #   deprecated
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip

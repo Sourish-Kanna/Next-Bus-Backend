@@ -1,8 +1,10 @@
 from fastapi import FastAPI, Request, Response, status
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import common.firebase as firebase
-import v1
 import logging
 from common.config import load_env, resolve_origins, get_env
 
@@ -31,7 +33,11 @@ async def lifespan(app: FastAPI):
     logger.info("Application is shutting down.")
 
 # --- Pass the lifespan function to your app ---
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(lifespan=lifespan, title="NextBus Backend", version="2.1.7")
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 if get_env("DEV_ENV", "false") == "true": logger.info("Loading Dev env....") 
 else: logger.info("Loading Production env....")
@@ -67,4 +73,5 @@ def root(request: Request):
 def favicon() -> Response:
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+import v1
 app.include_router(v1.ver_1)

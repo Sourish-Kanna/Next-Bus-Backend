@@ -1,20 +1,22 @@
-from fastapi import APIRouter, Body, HTTPException , status, Depends
+from fastapi import APIRouter, Body, HTTPException, Request , status, Depends
 from google.api_core.exceptions import Conflict
 from common.decorators import log_activity, is_authenticated
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
-import common.response_base as response_base
+import common.response as response
 import common.firebase as firebase
 import common as common
 import logging
 from v1.future import save_historical_data
+from main import limiter
 
 logger = logging.getLogger(__name__)
 routes_router = APIRouter(prefix="/route", tags=["Routes"])
 
 @routes_router.post("/add")
+@limiter.limit("5/minute")
 @log_activity
 @is_authenticated
-def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = Depends(common.get_token_from_header)) -> response_base.FireBaseResponse:
+def add_new_route(request: Request, input: response.Add_New_Route = Body(...), token: str = Depends(common.get_token_from_header)) -> response.FireBaseResponse:
     """
     Adds a new bus route to the database.
     """
@@ -52,7 +54,7 @@ def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = D
         # firebase.log_to_firestore("ROUTE_CREATED", {"route": input.route_name}, uid, "INFO")
         
         logger.info(f"Route '{input.route_name}' created successfully.")
-        return response_base.FireBaseResponse(
+        return response.FireBaseResponse(
             message="Document created successfully with initial timing",
             data=response_data # type: ignore
         )
@@ -74,9 +76,10 @@ def add_new_route(input: response_base.Add_New_Route = Body(...), token: str = D
             }
         )
     
-@routes_router.get("/routes", response_model=response_base.FireBaseResponse)
+@routes_router.get("/routes", response_model=response.FireBaseResponse)
+@limiter.limit("100/minute")
 @log_activity
-def get_routes() -> response_base.FireBaseResponse:
+def get_routes(request: Request) -> response.FireBaseResponse:
     """
     Get all bus routes.
     """
@@ -91,7 +94,7 @@ def get_routes() -> response_base.FireBaseResponse:
         else:
             message = "Routes fetched successfully"
         logger.info(f"All routes fetched successfully: {all_routes}")
-        return response_base.FireBaseResponse(
+        return response.FireBaseResponse(
             message=message,
             data=all_routes
         )

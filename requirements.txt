@@ -31,6 +31,8 @@ cryptography==46.0.7
     # via
     #   google-auth
     #   pyjwt
+deprecated==1.3.1
+    # via limits
 fastapi==0.135.3
     # via -r requirements.in
 firebase-admin==7.4.0
@@ -91,8 +93,12 @@ idna==3.11
     #   anyio
     #   httpx
     #   requests
+limits==5.8.0
+    # via slowapi
 msgpack==1.1.2
     # via cachecontrol
+packaging==26.2
+    # via limits
 proto-plus==1.27.2
     # via
     #   google-api-core
@@ -123,12 +129,15 @@ requests==2.33.1
     #   cachecontrol
     #   google-api-core
     #   google-cloud-storage
+slowapi==0.1.9
+    # via -r requirements.in
 starlette==1.0.0
     # via fastapi
 typing-extensions==4.15.0
     # via
     #   fastapi
     #   grpcio
+    #   limits
     #   pydantic
     #   pydantic-core
     #   typing-inspection
@@ -140,3 +149,5 @@ urllib3==2.6.3
     # via requests
 uvicorn==0.44.0
     # via -r requirements.in
+wrapt==2.1.2
+    # via deprecated

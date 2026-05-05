@@ -10,7 +10,7 @@ def load_env():
     """Load environment variables from dev.env or prod.env files.
     Priority is given to dev.env for local development.
     """
-    dev_path = Path("dev.env")
+    dev_path = Path("dev.env") or Path(".env")
     prod_path = Path("prod.env")
     if dev_path.exists():
         logger.info("dev.env found; loading dev.env for local development")
@@ -40,4 +40,7 @@ def resolve_origins():
     origin_list_str = os.getenv("ORIGIN_LIST")
     if origin_list_str == "*":
         return ["*"]
+    if not origin_list_str:
+        logger.warning("No ORIGIN_LIST set; defaulting to localhost")
+        return ["localhost:8000"]  # Default to localhost:8000 if ORIGIN_LIST is not set
     return [origin.strip() for origin in origin_list_str.split(",") if origin.strip()]
