@@ -14,7 +14,7 @@ test_router = APIRouter(prefix="/test", tags=["Test"])
 @limiter.limit("10/minute")
 @verify_id_token
 @log_activity
-def verify_firebase_token(request: Request, token: str = Depends(common.get_token_from_header)) -> response.FireBaseResponse:
+def verify_firebase_token(request: Request, token:str = Depends(firebase.get_user_token)) -> response.FireBaseResponse:
     """Verify Firebase ID token."""
     try:
         decoded_token = firebase.get_token_details(token)

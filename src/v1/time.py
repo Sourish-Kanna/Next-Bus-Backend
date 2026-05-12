@@ -117,7 +117,7 @@ def firebase_add_new_time(input: response.Firebase_Add_New_Time, token: str) -> 
 @limiter.limit("5/minute")
 @log_activity
 @is_authenticated
-def update_time(request: Request, input: response.Update_Time = Body(...), token:str = Depends(common.get_token_from_header)) -> response.FireBaseResponse:
+def update_time(request: Request, input: response.Update_Time = Body(...), token:str = Depends(firebase.get_user_token)) -> response.FireBaseResponse:
     try:
         doc_ref = firebase.db.collection("busRoutes").document(input.route_name)
         doc = doc_ref.get()

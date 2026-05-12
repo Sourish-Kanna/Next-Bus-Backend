@@ -1,15 +1,18 @@
 import logging
-from os import getenv
+from  common.config import get_env
 from json import loads
 from fastapi import HTTPException, status
 import firebase_admin
 from firebase_admin import credentials, initialize_app, firestore, auth
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Depends
 
 # Logging for Firebase initialization
 logger = logging.getLogger(__name__)
 
 firebase_app = None
+security = HTTPBearer()
 db = None
 def initialize_firebase():
     global firebase_app, db
@@ -17,7 +20,7 @@ def initialize_firebase():
     cred = None
     cred_dict = None
     
-    firebase_credentials_json = getenv("FIREBASE_CREDENTIALS_JSON")
+    firebase_credentials_json = get_env("FIREBASE_CREDENTIALS_JSON",required=True)
     if not firebase_credentials_json:
         logger.error("No Firebase credentials found: set FIREBASE_CREDENTIALS_JSON")
         raise ValueError("Firebase credentials not provided")
@@ -59,14 +62,14 @@ def get_token_details(id_token):
         logger.error(f"Token Data extraction failed: {e}")
         raise Exception(e)
 
-def create_custom_token(uid):
+""" def create_custom_token(uid):
     try:
         custom_token = auth.create_custom_token(uid)
         logger.info(f"Custom token created for UID: {uid}")
         return custom_token.decode('utf-8')
     except Exception as e:
         logger.error(f"Failed to create custom token for UID {uid}: {e}")
-        raise Exception(e)
+        raise Exception(e) """
 
 def Name_and_UID(token):
     decoded_token = get_token_details(token)
@@ -82,7 +85,7 @@ def get_admin_details(token):
         is_logged_in = False # Non admin user but logged in
         is_guest = False
         allowed_providers = ["password", "google.com"]
-        if getenv("DEV_ENV", "false").lower() == "true":
+        if get_env("DEV_ENV", "false").lower() == "true":
             allowed_providers.append("custom")
 
         if user_id and sign_in_provider in allowed_providers:
@@ -118,23 +121,31 @@ def get_admin_details(token):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Token verification failed: {e}"
         )
+    
+def get_user_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Dependency to validate Firebase token and return it.
+    Automatically handles the 'Bearer' prefix and Swagger 'Authorize' UI.
+    """
+    token = credentials.credentials
+    return token
 
-# def log_to_firestore(action: str, details: dict, user_id: str, level: str = "INFO"):
-#     """
-#     Saves a system log to the 'systemLogs' collection in Firestore.
-#     Used ONLY for Warnings, Errors, or Critical Actions to save costs.
-#     """
-#     try:
-#         if db is not None:
-#             db.collection("systemLogs").add({
-#                 "timestamp": SERVER_TIMESTAMP,
-#                 "action": action,
-#                 "level": level,
-#                 "userId": user_id,
-#                 "details": details
-#             })
-#         else:
-#             logger.warning("Firestore DB not initialized, skipping log_to_firestore")
-#     except Exception as e:
-#         # Never fail the main request just because logging failed
-#         logger.error(f"Failed to write system log: {e}")
+""" def log_to_firestore(action: str, details: dict, user_id: str, level: str = "INFO"):
+    " ""
+    Saves a system log to the 'systemLogs' collection in Firestore.
+    Used ONLY for Warnings, Errors, or Critical Actions to save costs.
+    " ""
+    try:
+        if db is not None:
+            db.collection("systemLogs").add({
+                "timestamp": SERVER_TIMESTAMP,
+                "action": action,
+                "level": level,
+                "userId": user_id,
+                "details": details
+            })
+        else:
+            logger.warning("Firestore DB not initialized, skipping log_to_firestore")
+    except Exception as e:
+        # Never fail the main request just because logging failed
+        logger.error(f"Failed to write system log: {e}") """

@@ -16,7 +16,7 @@ routes_router = APIRouter(prefix="/route", tags=["Routes"])
 @limiter.limit("5/minute")
 @log_activity
 @is_authenticated
-def add_new_route(request: Request, input: response.Add_New_Route = Body(...), token: str = Depends(common.get_token_from_header)) -> response.FireBaseResponse:
+def add_new_route(request: Request, input: response.Add_New_Route = Body(...), token:str = Depends(firebase.get_user_token)) -> response.FireBaseResponse:
     """
     Adds a new bus route to the database.
     """

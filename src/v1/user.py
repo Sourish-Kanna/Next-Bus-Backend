@@ -13,7 +13,7 @@ user_router = APIRouter(prefix="/user", tags=["User"])
 @user_router.get("/get-user-details")
 @limiter.limit("10/minute")
 @log_activity
-def get_user_details(request: Request, token: str = Depends(common.get_token_from_header)):
+def get_user_details(request: Request, token:str = Depends(firebase.get_user_token)) -> response.FireBaseResponse:
     """Get User Details"""
     user_uid = "unknown"
     try:
@@ -65,7 +65,7 @@ def get_user_details(request: Request, token: str = Depends(common.get_token_fro
 @user_router.post("/sync")
 @limiter.limit("5/minute")
 @log_activity
-def sync_user(request: Request, token: str = Depends(common.get_token_from_header)):
+def sync_user(request: Request, token:str = Depends(firebase.get_user_token)) -> response.FireBaseResponse:
     """
     Called from the frontend right after Firebase Auth sign-in.
     Creates a user document in Firestore ONLY for permanent accounts (e.g., Google, Email).

@@ -135,9 +135,9 @@ def generate_real_custom_token():
             return
 
         # 3. Copy the final ID token to clipboard
-        bearer_token = "Bearer "
+        bearer_token = ""
         try:
-            bearer_token = f"Bearer {id_token}"
+            bearer_token = f"{id_token}"
             pyperclip.copy(bearer_token)
             print("✅ Final 'Bearer' token copied to clipboard!")
         except Exception as e:
