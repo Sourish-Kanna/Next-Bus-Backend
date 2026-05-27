@@ -146,7 +146,7 @@ It is intentionally **not over-engineered**.
 
 ### Prerequisites
 
-* Python 3.8+
+* Python 3.12
 * Firebase project with Firestore enabled
 * Firebase service account credentials
 

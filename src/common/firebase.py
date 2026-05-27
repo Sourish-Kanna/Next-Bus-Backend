@@ -4,7 +4,7 @@ from json import loads
 from fastapi import HTTPException, status
 import firebase_admin
 from firebase_admin import credentials, initialize_app, firestore, auth
-from google.cloud.firestore_v1 import SERVER_TIMESTAMP
+from google.cloud.firestore_v1 import SERVER_TIMESTAMP, DocumentSnapshot
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends
 
@@ -85,16 +85,19 @@ def get_admin_details(token):
         is_logged_in = False # Non admin user but logged in
         is_guest = False
         allowed_providers = ["password", "google.com"]
-        if get_env("DEV_ENV", "false").lower() == "true":
+        if str(get_env("DEV_ENV", "false")).lower() == "true":
             allowed_providers.append("custom")
 
         if user_id and sign_in_provider in allowed_providers:
+            if db is None: # Resolve "collection is not a known attribute of None"
+                raise ValueError("Database not initialized")
             is_logged_in = True
-            user_ref = db.collection("users").document(user_id)  # type: ignore
-            user_doc = user_ref.get()
+            user_ref = db.collection("users").document(user_id)  
+            user_doc: DocumentSnapshot = user_ref.get()
             if user_doc.exists:
                 user_data = user_doc.to_dict()
-                is_admin = user_data.get("isAdmin", False)  # type: ignore
+                if user_data: # Resolve "get is not a known attribute of None"
+                    is_admin = user_data.get("isAdmin", False) 
             else:
                 is_admin = False
         elif sign_in_provider == "anonymous":

@@ -50,13 +50,16 @@ def add_new_route(request: Request, input: response.Add_New_Route = Body(...), t
         
         created_doc = doc_ref.get()
         response_data = created_doc.to_dict()
+
+        if response_data is None:
+            raise HTTPException(status_code=500, detail="Failed to retrieve created route data")
         
         # firebase.log_to_firestore("ROUTE_CREATED", {"route": input.route_name}, uid, "INFO")
         
         logger.info(f"Route '{input.route_name}' created successfully.")
         return response.FireBaseResponse(
             message="Document created successfully with initial timing",
-            data=response_data # type: ignore
+            data=response_data 
         )
     except Conflict:
         logger.warning(f"Route '{input.route_name}' already exists.")

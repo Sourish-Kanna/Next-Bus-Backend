@@ -19,8 +19,10 @@ def firebase_update_time(input: response.Firebase_Update_Time, token: str ) -> r
     try:
         name, uid = firebase.Name_and_UID(token)
         doc = doc_ref.get()
+        doc_dict = doc.to_dict()
+        if doc_dict:
+            time = doc_dict.get("timing", [])
 
-        time = doc.to_dict().get("timing", []) # type: ignore
         current_delay = 0
         
         for t in time:
@@ -86,7 +88,7 @@ def firebase_add_new_time(input: response.Firebase_Add_New_Time, token: str) -> 
     try:
         doc = doc_ref.get()
         name, uid = firebase.Name_and_UID(token)
-        existing_timings = doc.to_dict().get("timing", []) # type: ignore
+        existing_timings = doc.to_dict().get("timing", []) 
         updated_timings = existing_timings + [input.timing]
         document_data = {
             "lastUpdated": SERVER_TIMESTAMP,
@@ -97,13 +99,13 @@ def firebase_add_new_time(input: response.Firebase_Add_New_Time, token: str) -> 
         timming = input.timing
         save_historical_data(
             route_name=input.route_name,
-            reported_time=timming.get("time"), # type: ignore
-            official_time=timming.get("time"), # type: ignore
-            delay=timming.get("delay_by"), # type: ignore
+            reported_time=str(timming.get("time", "")), 
+            official_time=str(timming.get("time", "")), 
+            delay=timming.get("delay_by", 0.0), 
             user_id=uid
         )
         created_doc = doc_ref.get()
-        response_data = created_doc.to_dict().get("timing", []) # type: ignore
+        response_data = created_doc.to_dict().get("timing", []) 
         logger.info(f"New timing added for route '{input.route_name}'.")
         return response.FireBaseResponse(
             message="Document updated successfully with new timing",
@@ -136,7 +138,7 @@ def update_time(request: Request, input: response.Update_Time = Body(...), token
             )
         
         doc_dict = doc.to_dict()
-        timing = doc_dict.get("timing", []) # type: ignore
+        timing = doc_dict.get("timing", []) 
         input_time = input.timing
         
         # Check existing times and update if within threshold
@@ -318,7 +320,7 @@ def get_time(request: Request, route_name: str) -> response.FireBaseResponse:
                 "stop": t.get("stop_name"), 
                 "delay": t.get("delay_by"),
                 "count": t.get("deviation_count"),
-            } for t in doc.to_dict().get("timing", [])]  # type: ignore
+            } for t in doc.to_dict().get("timing", [])]  
         sorted_timing = sorted(timing_data, key=lambda x: common.convert_to_24hr(x["time"]))
         logger.info(f"Timing details fetched successfully for route '{route_name}': {len(timing_data)}")
         return response.FireBaseResponse(

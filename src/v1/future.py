@@ -34,8 +34,8 @@ def isRateLimitExceeded(token:str, route_name:str, table:str) -> bool:
         doc_ref = firebase.db.collection(table).document(route_name)
         doc = doc_ref.get()
         doc_dict = doc.to_dict()
-        last_updated_by = doc_dict.get("lastUpdatedBy", "") # type: ignore
-        last_updated_ts = doc_dict.get("lastUpdated") # type: ignore
+        last_updated_by = doc_dict.get("lastUpdatedBy", "") 
+        last_updated_ts = doc_dict.get("lastUpdated") 
         
         if f"{name} ({uid})" == last_updated_by and last_updated_ts:
             now = datetime.now(timezone.utc)                            

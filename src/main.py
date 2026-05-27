@@ -68,10 +68,10 @@ tags_metadata = [
 
 # --- Pass the lifespan function to your app ---
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(lifespan=lifespan, title="NextBus Backend", version="2.1.7", openapi_tags=tags_metadata)
+app = FastAPI(lifespan=lifespan, title="NextBus Backend", version="2.2.0", openapi_tags=tags_metadata)
 
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler) # type: ignore
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler) 
 
 if get_env("DEV_ENV", "false") == "true": logger.info("Loading Dev env....") 
 else: logger.info("Loading Production env....")
@@ -99,7 +99,7 @@ def root(request: Request):
         logger.info("Root endpoint called with GET request")
         return {
             "message": "Welcome to the API!", 
-            "version": "2.1.7",
+            "version": "2.2.0",
             "dev_env": get_env("DEV_ENV", "false") == "true"
             }
 
