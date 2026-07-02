@@ -42,12 +42,6 @@ click==8.3.3
     #   -c requirements.txt
     #   pip-tools
     #   uvicorn
-colorama==0.4.6
-    # via
-    #   -c requirements.txt
-    #   build
-    #   click
-    #   pytest
 cryptography==48.0.0
     # via
     #   -c requirements.txt
@@ -203,7 +197,7 @@ pydantic-core==2.46.4
     #   pydantic
 pygments==2.20.0
     # via pytest
-pyjwt[crypto]==2.12.1
+pyjwt[crypto]==2.13.0
     # via
     #   -c requirements.txt
     #   firebase-admin
@@ -237,11 +231,13 @@ starlette==1.0.0
 typing-extensions==4.15.0
     # via
     #   -c requirements.txt
+    #   anyio
     #   fastapi
     #   grpcio
     #   limits
     #   pydantic
     #   pydantic-core
+    #   starlette
     #   typing-inspection
 typing-inspection==0.4.2
     # via
