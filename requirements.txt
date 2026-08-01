@@ -4,44 +4,46 @@
 #
 #    pip-compile requirements.in
 #
-annotated-doc==0.0.4
+annotated-doc==0.0.5
     # via fastapi
-annotated-types==0.7.0
+annotated-types==0.8.0
     # via pydantic
-anyio==4.13.0
+anyio==4.14.2
     # via
     #   httpx
     #   starlette
 cachecontrol==0.14.4
     # via firebase-admin
-certifi==2026.4.22
+certifi==2026.7.22
     # via
     #   httpcore
     #   httpx
     #   requests
-cffi==2.0.0
+cffi==2.1.0
     # via cryptography
-charset-normalizer==3.4.7
+charset-normalizer==3.4.9
     # via requests
-click==8.3.3
+click==8.4.2
     # via uvicorn
-cryptography==48.0.0
+colorama==0.4.6
+    # via click
+cryptography==50.0.0
     # via
     #   google-auth
     #   pyjwt
 deprecated==1.3.1
     # via limits
-fastapi==0.136.1
+fastapi==0.141.1
     # via -r requirements.in
-firebase-admin==7.4.0
+firebase-admin==7.5.0
     # via -r requirements.in
-google-api-core[grpc]==2.30.3
+google-api-core[grpc]==2.33.0
     # via
     #   firebase-admin
     #   google-cloud-core
     #   google-cloud-firestore
     #   google-cloud-storage
-google-auth==2.52.0
+google-auth==2.56.2
     # via
     #   google-api-core
     #   google-cloud-core
@@ -51,34 +53,34 @@ google-cloud-core==2.6.0
     # via
     #   google-cloud-firestore
     #   google-cloud-storage
-google-cloud-firestore==2.27.0
+google-cloud-firestore==2.28.0
     # via firebase-admin
-google-cloud-storage==3.10.1
+google-cloud-storage==3.13.0
     # via firebase-admin
 google-crc32c==1.8.0
     # via
     #   google-cloud-storage
     #   google-resumable-media
-google-resumable-media==2.9.0
+google-resumable-media==2.10.0
     # via google-cloud-storage
 googleapis-common-protos==1.75.0
     # via
     #   google-api-core
     #   grpcio-status
-grpcio==1.80.0
+grpcio==1.83.0
     # via
     #   google-api-core
     #   google-cloud-firestore
     #   grpcio-status
-grpcio-status==1.80.0
+grpcio-status==1.83.0
     # via google-api-core
 h11==0.16.0
     # via
     #   httpcore
     #   uvicorn
-h2==4.3.0
+h2==4.4.0
     # via httpx
-hpack==4.1.0
+hpack==4.2.0
     # via h2
 httpcore==1.0.9
     # via httpx
@@ -86,29 +88,29 @@ httpx[http2]==0.28.1
     # via firebase-admin
 hyperframe==6.1.0
     # via h2
-idna==3.14
+idna==3.18
     # via
     #   anyio
     #   httpx
     #   requests
 limits==5.8.0
     # via slowapi
-msgpack==1.1.2
+msgpack==1.2.1
     # via cachecontrol
 packaging==26.2
     # via limits
-proto-plus==1.28.0
+proto-plus==1.28.2
     # via
     #   google-api-core
     #   google-cloud-firestore
-protobuf==6.33.6
+protobuf==7.35.1
     # via
     #   google-api-core
     #   google-cloud-firestore
     #   googleapis-common-protos
     #   grpcio-status
     #   proto-plus
-pyasn1==0.6.3
+pyasn1==0.6.4
     # via pyasn1-modules
 pyasn1-modules==0.4.2
     # via google-auth
@@ -122,24 +124,22 @@ pyjwt[crypto]==2.13.0
     # via firebase-admin
 python-dotenv==1.2.2
     # via -r requirements.in
-requests==2.34.0
+requests==2.34.2
     # via
     #   cachecontrol
     #   google-api-core
     #   google-cloud-storage
-slowapi==0.1.9
+slowapi==0.1.10
     # via -r requirements.in
-starlette==1.0.0
+starlette==1.3.1
     # via fastapi
-typing-extensions==4.15.0
+typing-extensions==4.16.0
     # via
-    #   anyio
     #   fastapi
     #   grpcio
     #   limits
     #   pydantic
     #   pydantic-core
-    #   starlette
     #   typing-inspection
 typing-inspection==0.4.2
     # via
@@ -147,7 +147,7 @@ typing-inspection==0.4.2
     #   pydantic
 urllib3==2.7.0
     # via requests
-uvicorn==0.46.0
+uvicorn==0.52.1
     # via -r requirements.in
-wrapt==2.1.2
+wrapt==2.3.0
     # via deprecated
