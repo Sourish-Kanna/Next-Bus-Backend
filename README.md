@@ -161,11 +161,29 @@ git clone https://github.com/Sourish-Kanna/Next-Bus-Backend.git
 cd Next-Bus-Backend
 ```
 
+1. **Create and activate the virtual environment**
+
+```bash
+uv venv .venv
+```
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
 1. **Install dependencies**
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.in
 ```
+
+If you also want the developer/test tooling, install the dev input file as well:
+
+```bash
+uv pip install -r requirements-dev.in
+```
+
+These install commands run inside the activated `.venv`; no `tasks.json` is required.
 
 1. **Configure environment**
 

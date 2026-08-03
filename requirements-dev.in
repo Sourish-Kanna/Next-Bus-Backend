@@ -1,7 +1,5 @@
--c requirements.txt
 -r requirements.in
 
 pytest
 pyperclip
-pip-tools
 requests
