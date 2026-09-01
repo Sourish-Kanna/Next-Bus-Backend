@@ -1,4 +1,4 @@
-# Exported from Render on 2026-03-21T10:29:09Z
+# Render deployment configuration
 version: "1"
 services:
 
@@ -16,8 +16,8 @@ services:
   - key: DEV_ENV
     sync: false
   region: oregon
-  buildCommand: pip install -r requirements.txt
-  startCommand: uvicorn --app-dir src main:app --host 0.0.0.0 --port $PORT
+  buildCommand: uv sync --frozen --no-dev
+  startCommand: uv run --no-sync uvicorn --app-dir src main:app --host 0.0.0.0 --port $PORT
   healthCheckPath: /
   autoDeployTrigger: commit
 
@@ -35,7 +35,7 @@ services:
   - key: DEV_ENV
     sync: false
   region: oregon
-  buildCommand: pip install -r requirements.txt
-  startCommand: uvicorn --app-dir src main:app --host 0.0.0.0 --port $PORT
+  buildCommand: uv sync --frozen --no-dev
+  startCommand: uv run --no-sync uvicorn --app-dir src main:app --host 0.0.0.0 --port $PORT
   healthCheckPath: /
   autoDeployTrigger: commit
