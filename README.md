@@ -106,9 +106,10 @@ It is intentionally **not over-engineered**.
 
 ### Core
 
-* **Python 3.10+**
+* **Python 3.12+**
 * **FastAPI**
 * **Uvicorn** (ASGI server)
+* **uv** for dependency management and reproducible environments
 
 ### Cloud & Data
 
@@ -146,7 +147,8 @@ It is intentionally **not over-engineered**.
 
 ### Prerequisites
 
-* Python 3.12
+* Python 3.12+
+* [uv](https://docs.astral.sh/uv/)
 * Firebase project with Firestore enabled
 * Firebase service account credentials
 
@@ -161,31 +163,19 @@ git clone https://github.com/Sourish-Kanna/Next-Bus-Backend.git
 cd Next-Bus-Backend
 ```
 
-1. **Create and activate the virtual environment**
+2. **Install/sync the project**
 
 ```bash
-uv venv .venv
+uv sync
 ```
 
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
+This creates/uses `.venv`, installs the project and all runtime dependencies, and respects `uv.lock` when it is available.
 
-1. **Install dependencies**
+3. **Install developer dependencies**
 
-```bash
-uv pip install -r requirements.in
-```
+The `dev` dependency group contains pytest and local development utilities and is included by the default `uv sync`.
 
-If you also want the developer/test tooling, install the dev input file as well:
-
-```bash
-uv pip install -r requirements-dev.in
-```
-
-These install commands run inside the activated `.venv`; no `tasks.json` is required.
-
-1. **Configure environment**
+4. **Configure environment**
 
 Create `dev.env` (see `.env.example`):
 
@@ -197,10 +187,16 @@ ORIGIN_LIST=*
 
 > Do not commit secrets. Use secure environment variables in deployment.
 
-1. **Run locally**
+5. **Run locally**
 
 ```bash
-uvicorn --app-dir src main:app --reload
+uv run uvicorn --app-dir src main:app --reload
+```
+
+6. **Run tests**
+
+```bash
+uv run pytest
 ```
 
 API will be available at `http://127.0.0.1:8000`.
@@ -215,6 +211,8 @@ API will be available at `http://127.0.0.1:8000`.
   * **Development**
   * **Stable**
 * API versioning uses `/v1` (contract may evolve)
+
+Render uses `uv sync --frozen --no-dev` to install the locked production environment and `uv run --no-sync` to launch Uvicorn.
 
 ---
 
