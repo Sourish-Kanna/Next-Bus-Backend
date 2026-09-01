@@ -1,5 +1,0 @@
--r requirements.in
-
-pytest
-pyperclip
-requests
