@@ -5,7 +5,22 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nextbus-backend"
 version = "2.1.7"
-requires-python = ">=3.12, <3.13"
+description = "REST API backend powering the Next Bus ecosystem."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "python-dotenv",
+    "uvicorn",
+    "firebase-admin",
+    "slowapi",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pyperclip",
+    "requests",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
