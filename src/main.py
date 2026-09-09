@@ -56,10 +56,10 @@ tags_metadata = [
         "name": "User",
         "description": "Firebase authentication sync and role-based access details.",
     },
-    '''{
-        "name": "Future (ML/Historical)",
-        "description": "Endpoints and background logic designed for saving historical delay data for future AI model training.",
-    },'''
+    #{
+    #    "name": "Future (ML/Historical)",
+  #      "description": "Endpoints and background logic designed for saving historical delay data for future AI model training.",
+ #   },
     {
         "name": "Test",
         "description": "Diagnostic tools available only in `DEV_ENV`. Includes token verification helpers.",
