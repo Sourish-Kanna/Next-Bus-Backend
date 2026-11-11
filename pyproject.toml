@@ -8,7 +8,7 @@ version = "2.1.7"
 description = "REST API backend powering the Next Bus ecosystem."
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi",
+    "fastapi[standard]",
     "python-dotenv",
     "uvicorn",
     "firebase-admin",
