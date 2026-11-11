@@ -156,50 +156,50 @@ It is intentionally **not over-engineered**.
 
 ### Setup
 
-1. **Clone the repository**
+  1. **Clone the repository**
 
-```bash
-git clone https://github.com/Sourish-Kanna/Next-Bus-Backend.git
-cd Next-Bus-Backend
-```
+    ```bash
+    git clone https://github.com/Sourish-Kanna/Next-Bus-Backend.git
+    cd Next-Bus-Backend
+    ```
 
-2. **Install/sync the project**
+  2. **Install/sync the project**
 
-```bash
-uv sync
-```
+    ```bash
+    uv sync
+    ```
 
-This creates/uses `.venv`, installs the project and all runtime dependencies, and respects `uv.lock` when it is available.
+    This creates/uses `.venv`, installs the project and all runtime dependencies, and respects `uv.lock` when it is available.
 
-3. **Install developer dependencies**
+  3. **Install developer dependencies**
 
-The `dev` dependency group contains pytest and local development utilities and is included by the default `uv sync`.
+    The `dev` dependency group contains pytest and local development utilities and is included by the default `uv sync`.
 
-4. **Configure environment**
+  4. **Configure environment**
 
-Create `dev.env` (see `.env.example`):
+  Create `dev.env` (see `.env.example`):
 
-```env
-DEV_ENV=true
-FIREBASE_CREDENTIALS_JSON='{...service account json...}'
-ORIGIN_LIST=*
-```
+    ```env
+    DEV_ENV=true
+    FIREBASE_CREDENTIALS_JSON='{...service account json...}'
+    ORIGIN_LIST=*
+    ```
 
-> Do not commit secrets. Use secure environment variables in deployment.
+    > Do not commit secrets. Use secure environment variables in deployment.
 
-5. **Run locally**
+  5. **Run locally**
 
-```bash
-uv run fastapi dev src/main.py
-```
+    ```bash
+    uv run fastapi dev src/main.py
+    ```
 
-6. **Run tests**
+  6. **Run tests**
 
-```bash
-uv run pytest
-```
+    ```bash
+    uv run pytest
+    ```
 
-API will be available at `http://127.0.0.1:8000`.
+    API will be available at `http://127.0.0.1:8000`.
 
 ---
 
