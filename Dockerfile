@@ -18,4 +18,7 @@ RUN uv sync --frozen --no-dev
 
 EXPOSE 8000
 
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
+  CMD-SHELL python -c 'import os, urllib.request; urllib.request.urlopen("http://127.0.0.1:" + os.getenv("PORT", "8000") + "/", timeout=4)' || exit 1
+
 CMD ["sh", "-c", "exec /app/.venv/bin/fastapi run src/main.py --host 0.0.0.0 --port ${PORT:-8000}"]
