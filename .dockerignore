@@ -1,0 +1,14 @@
+.git
+.github
+.idea
+.venv
+.pytest_cache
+__pycache__
+*.py[cod]
+*.env
+json-credentials
+dev
+tests
+README.md
+.dockerignore
+Dockerfile

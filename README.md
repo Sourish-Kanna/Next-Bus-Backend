@@ -106,7 +106,7 @@ It is intentionally **not over-engineered**.
 
 ### Core
 
-* **Python 3.12+**
+* **Python 3.12+** (uv uses Python 3.14 by default in this repository)
 * **FastAPI**
 * **Uvicorn** (ASGI server)
 * **uv** for dependency management and reproducible environments
@@ -147,7 +147,7 @@ It is intentionally **not over-engineered**.
 
 ### Prerequisites
 
-* Python 3.12+
+* Python 3.12+ (Python 3.14 is the default development interpreter)
 * [uv](https://docs.astral.sh/uv/)
 * Firebase project with Firestore enabled
 * Firebase service account credentials
@@ -190,7 +190,7 @@ ORIGIN_LIST=*
 5. **Run locally**
 
 ```bash
-uv run uvicorn --app-dir src main:app --reload
+uv run fastapi dev src/main.py
 ```
 
 6. **Run tests**
@@ -205,14 +205,40 @@ API will be available at `http://127.0.0.1:8000`.
 
 ## 🌿 Deployment
 
-* Hosted on **Render**
+* Hosted on **Render** or **Coolify**
 * Separate services for:
 
   * **Development**
   * **Stable**
 * API versioning uses `/v1` (contract may evolve)
 
-Render uses `uv sync --frozen --no-dev` to install the locked production environment and `uv run --no-sync` to launch Uvicorn.
+Render uses `uv sync --frozen --no-dev` to install the locked production environment and
+`uv run --no-sync fastapi run src/main.py --host 0.0.0.0 --port $PORT` to launch FastAPI.
+
+### Coolify with Docker
+
+Create a Coolify application from this repository and select **Dockerfile** as the build
+pack. Coolify will use the root `Dockerfile`; set the exposed port to `8000` and the health
+check path to `/`. If Coolify provides a `PORT` variable, the container uses it automatically.
+
+Configure these runtime environment variables in Coolify:
+
+```env
+DEV_ENV=false
+ORIGIN_LIST=https://your-frontend.example
+FIREBASE_CREDENTIALS_JSON={...service account json...}
+```
+
+The Docker image installs the locked production dependencies with uv and starts FastAPI
+using `fastapi run`. Build or deploy it locally with:
+
+```bash
+docker build -t nextbus-backend .
+docker run --rm -p 8000:8000 --env-file prod.env nextbus-backend
+```
+
+Do not copy service-account files into the image or commit them to the repository. Store
+the Firebase credentials as a protected Coolify environment variable.
 
 ---
 
