@@ -2,5 +2,5 @@ __pycache__/
 *.env
 .idea
 .vscode
-.python-version
+!.python-version
 *.egg-info/
